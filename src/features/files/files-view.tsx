@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Eye, IdCard, Receipt, ShieldCheck } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { Dialog } from "radix-ui";
 import { useState } from "react";
 import { Card, Chip, ErrorNote, ghostButton, PageHeader, primaryButton, QueryState, Sheet, SuccessNote } from "@/features/portal/ui";
@@ -25,16 +26,32 @@ export function FilesView() {
   const t = useTranslations("Files");
   const queryClient = useQueryClient();
   const params = useSearchParams();
+  const router = useRouter();
   const query = usePortalQuery("files", () => api.GET("/files"));
   const requested = params.get("update");
   const [updating, setUpdating] = useState<DocumentType | null>(isDocumentType(requested) ? requested : null);
   const [sent, setSent] = useState<DocumentType | null>(null);
+  const [lastRequested, setLastRequested] = useState(requested);
+
+  // Cada Update que llega desde Inicio abre la carga de ese documento, aunque la pantalla ya estuviera montada.
+  if (requested !== lastRequested) {
+    setLastRequested(requested);
+    if (isDocumentType(requested)) {
+      setSent(null);
+      setUpdating(requested);
+    }
+  }
 
   const target = query.data?.find((d) => d.type === updating);
   const sheetOpen = target !== undefined && canUpdate(target);
 
-  const onSent = async (type: DocumentType) => {
+  const closeSheet = () => {
     setUpdating(null);
+    if (requested !== null) router.replace("/files");
+  };
+
+  const onSent = async (type: DocumentType) => {
+    closeSheet();
     setSent(type);
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: ["files"] }),
@@ -54,7 +71,7 @@ export function FilesView() {
           ))}
         </div>
       )}
-      {sheetOpen && target && <UpdateSheet type={target.type} onClose={() => setUpdating(null)} onSent={onSent} />}
+      {sheetOpen && target && <UpdateSheet type={target.type} onClose={closeSheet} onSent={onSent} />}
     </div>
   );
 }

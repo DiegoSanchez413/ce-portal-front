@@ -11,6 +11,7 @@ import { usePathname, useRouter } from "@/i18n/navigation";
 import { api } from "@/lib/api/client";
 import type { PortalSessionInfo } from "@/lib/api/types";
 import { SessionContext, type SessionActions } from "./session-context";
+import { leavePortal } from "./leave-portal";
 import { fetchSession, SESSION_KEY, type SessionState } from "./session-query";
 
 // Protege las páginas con sesión: sin sesión va al login, sin acceso muestra la pantalla de reactivación.
@@ -23,8 +24,8 @@ export function PortalShell({ children }: { children: ReactNode }) {
   const { data: state } = useQuery({ queryKey: SESSION_KEY, queryFn: fetchSession });
 
   useEffect(() => {
-    if (state?.kind === "signed_out") router.replace("/login");
-  }, [state, router]);
+    if (state?.kind === "signed_out") leavePortal(locale);
+  }, [state, locale]);
 
   useEffect(() => {
     if (state?.kind !== "active" || languageSynced.current) return;
@@ -45,10 +46,7 @@ export function PortalShell({ children }: { children: ReactNode }) {
     return {
       session: state.session,
       signOut: () => {
-        void api.POST("/session/logout").finally(() => {
-          queryClient.clear();
-          router.replace("/login");
-        });
+        void api.POST("/session/logout").finally(() => leavePortal(locale));
       },
       switchClient: () => router.push("/switch-account"),
       switchAccount: (accountId) => {
@@ -60,7 +58,7 @@ export function PortalShell({ children }: { children: ReactNode }) {
         void api.POST("/session/language", { body: { language } }).catch(() => undefined);
       },
     };
-  }, [state, queryClient, router]);
+  }, [state, queryClient, router, locale]);
 
   if (state?.kind === "no_access") {
     return (

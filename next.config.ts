@@ -5,6 +5,7 @@ const withNextIntl = createNextIntlPlugin();
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
+  devIndicators: false,
   partialPrefetching: true,
   turbopack: {
     rules: {
