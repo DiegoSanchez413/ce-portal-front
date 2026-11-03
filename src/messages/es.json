@@ -157,12 +157,20 @@
     "method": "Método",
     "status": "Estado",
     "card": "Tarjeta •••• {last4}",
+    "methods": {
+      "cash": "Efectivo",
+      "check": "Cheque",
+      "money_order": "Giro postal"
+    },
     "downloadReceipt": "Descargar recibo",
     "receiptError": "No pudimos cargar el recibo. Intente de nuevo.",
     "concepts": {
       "initial_payment": "Pago inicial",
       "monthly_payment": "Pago mensual",
-      "charge": "Cargo"
+      "charge": "Cargo",
+      "void": "Anulación",
+      "refund": "Reembolso",
+      "yearly_total": "Pagos de {year}"
     },
     "statuses": {
       "approved": "Aprobado",

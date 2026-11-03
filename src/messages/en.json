@@ -157,12 +157,20 @@
     "method": "Method",
     "status": "Status",
     "card": "Card •••• {last4}",
+    "methods": {
+      "cash": "Cash",
+      "check": "Check",
+      "money_order": "Money order"
+    },
     "downloadReceipt": "Download receipt",
     "receiptError": "We couldn't load the receipt. Please try again.",
     "concepts": {
       "initial_payment": "Initial payment",
       "monthly_payment": "Monthly payment",
-      "charge": "Charge"
+      "charge": "Charge",
+      "void": "Void",
+      "refund": "Refund",
+      "yearly_total": "Payments of {year}"
     },
     "statuses": {
       "approved": "Approved",

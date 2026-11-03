@@ -99,9 +99,9 @@ function History({ items, onReceipt }: { items: PaymentItem[]; onReceipt: (recei
   const describe = (item: PaymentItem) => {
     const concept = paymentConcept(item);
     return {
-      type: concept.key ? t(`concepts.${concept.key}`) : (concept.detail ?? ""),
+      type: concept.key === "yearly_total" ? t("concepts.yearly_total", { year: concept.detail ?? "" }) : concept.key ? t(`concepts.${concept.key}`) : (concept.detail ?? ""),
       detail: concept.key === "charge" ? concept.detail : null,
-      method: item.card_last4 ? t("card", { last4: item.card_last4 }) : "—",
+      method: item.card_last4 ? t("card", { last4: item.card_last4 }) : item.method && item.method !== "card" ? t(`methods.${item.method}`) : "—",
       status: <Chip fg={STATUS_STYLES[item.status].fg} bg={STATUS_STYLES[item.status].bg}>{t(`statuses.${item.status}`)}</Chip>,
     };
   };
@@ -113,7 +113,7 @@ function History({ items, onReceipt }: { items: PaymentItem[]; onReceipt: (recei
         {items.map((item, i) => {
           const d = describe(item);
           return (
-            <Card key={`${item.transaction_id}-${i}`} className="gap-2.5 px-[18px] py-4">
+            <Card key={`${item.receipt_id ?? item.date}-${i}`} className="gap-2.5 px-[18px] py-4">
               <div className="flex items-start justify-between gap-2.5">
                 <div className="flex min-w-0 flex-col gap-0.5">
                   <span className="text-[15px] font-extrabold">{d.type}</span>
@@ -144,7 +144,7 @@ function History({ items, onReceipt }: { items: PaymentItem[]; onReceipt: (recei
         {items.map((item, i) => {
           const d = describe(item);
           return (
-            <div key={`${item.transaction_id}-${i}`} className="grid grid-cols-[1fr_1.3fr_.8fr_1.1fr_.9fr_190px] items-center gap-4 border-b border-line-soft py-3 text-[15px] last:border-b-0">
+            <div key={`${item.receipt_id ?? item.date}-${i}`} className="grid grid-cols-[1fr_1.3fr_.8fr_1.1fr_.9fr_190px] items-center gap-4 border-b border-line-soft py-3 text-[15px] last:border-b-0">
               <span className="font-extrabold">{formatDate(item.date, locale)}</span>
               <span className="flex min-w-0 flex-col font-semibold text-[#4b5563]">
                 {d.type}
@@ -172,7 +172,7 @@ function ReceiptButton({ item, onReceipt, variant }: { item: PaymentItem; onRece
     setBusy(true);
     setFailed(false);
     try {
-      const { data } = await api.POST("/payments/{transactionId}/receipt", { params: { path: { transactionId: item.transaction_id } } });
+      const { data } = await api.POST("/payments/{transactionId}/receipt", { params: { path: { transactionId: item.receipt_id ?? "" } } });
       if (data) onReceipt(data);
       else setFailed(true);
     } catch {

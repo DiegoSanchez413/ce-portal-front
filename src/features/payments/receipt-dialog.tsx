@@ -25,12 +25,12 @@ export function ReceiptDialog({ receipt, onClose }: { receipt: Receipt | null; o
   const concept = paymentConcept(receipt);
   const type = concept.key ? pay(`concepts.${concept.key}`) : (concept.detail ?? "");
   const plan = planPaymentLine(receipt.plan, receipt.plan_payment, (v) => t("planLine", v));
-  const method = receipt.card_last4 ? pay("card", { last4: receipt.card_last4 }) : "—";
+  const method = receipt.card_last4 ? pay("card", { last4: receipt.card_last4 }) : receipt.method && receipt.method !== "card" ? pay(`methods.${receipt.method}`) : "—";
   const rows: Row[] = [
     { label: t("date"), value: formatDate(receipt.date, locale) },
     { label: t("type"), value: concept.key === "charge" && concept.detail ? `${type} · ${concept.detail}` : type },
     { label: t("method"), value: method },
-    { label: t("transactionId"), value: receipt.transaction_id },
+    ...(receipt.transaction_id ? [{ label: t("transactionId"), value: receipt.transaction_id }] : []),
     ...(plan ? [{ label: t("plan"), value: plan }] : []),
     { label: t("client"), value: receipt.client },
     { label: t("account"), value: receipt.account },
@@ -49,7 +49,7 @@ export function ReceiptDialog({ receipt, onClose }: { receipt: Receipt | null; o
         ],
         contact: "(855) 517-0390 · customercare@creditexperts.us",
         footer: t("footer"),
-        fileName: `ce-receipt-${receipt.transaction_id}.pdf`,
+        fileName: `ce-receipt-${receipt.transaction_id ?? receipt.date}.pdf`,
       });
     } catch {
       setFailed(true);

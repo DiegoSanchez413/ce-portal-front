@@ -12,8 +12,9 @@ export const STATUS_STYLES: Record<PaymentStatus, { fg: string; bg: string }> = 
 };
 
 // Concepto visible: los tipos conocidos se traducen; cargos y otros muestran el detalle original.
-export function paymentConcept(item: Pick<PaymentItem, "concept" | "label">): { key: "initial_payment" | "monthly_payment" | "charge" | null; detail: string | null } {
-  if (item.concept === "initial_payment" || item.concept === "monthly_payment") return { key: item.concept, detail: null };
+export function paymentConcept(item: Pick<PaymentItem, "concept" | "label">): { key: "initial_payment" | "monthly_payment" | "charge" | "void" | "refund" | "yearly_total" | null; detail: string | null } {
+  if (item.concept === "initial_payment" || item.concept === "monthly_payment" || item.concept === "void" || item.concept === "refund") return { key: item.concept, detail: null };
+  if (item.concept === "yearly_total") return { key: "yearly_total", detail: item.label || null };
   if (item.concept === "charge") return { key: "charge", detail: item.label || null };
   return { key: null, detail: item.label || null };
 }
@@ -24,7 +25,7 @@ export function planPaymentLine(
   planPayment: number | null,
   template: (values: { plan: string; n: number; total: number }) => string,
 ): string | null {
-  if (!plan || planPayment === null) return null;
+  if (!plan || !plan.name || plan.total_payments <= 0 || planPayment === null) return null;
   return template({ plan: plan.name, n: planPayment, total: plan.total_payments });
 }
 
@@ -33,6 +34,7 @@ export function lateBreakdown(count: number, monthly: number): string {
   return `${count} × ${formatMoney(monthly)} = ${formatMoney(Math.round(count * monthly * 100) / 100)}`;
 }
 
-export function receiptAvailable(item: Pick<PaymentItem, "status">): boolean {
-  return item.status === "approved";
+// El back marca con receipt_id los pagos aprobados que tienen recibo (no el resumen de un año).
+export function receiptAvailable(item: Pick<PaymentItem, "receipt_id">): boolean {
+  return item.receipt_id !== null;
 }

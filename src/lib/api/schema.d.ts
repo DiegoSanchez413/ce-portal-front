@@ -725,13 +725,16 @@ export interface components {
             transunion: components["schemas"]["BureauScore"];
         };
         PaymentItem: {
-            transaction_id: string;
+            transaction_id: string | null;
+            receipt_id: string | null;
             /** Format: date */
             date: string;
             /** @enum {string} */
-            concept: "initial_payment" | "monthly_payment" | "charge" | "other";
+            concept: "initial_payment" | "monthly_payment" | "charge" | "void" | "refund" | "yearly_total" | "other";
             label: string;
             amount: number;
+            /** @enum {string|null} */
+            method: "card" | "cash" | "check" | "money_order" | null;
             card_last4: string | null;
             /** @enum {string} */
             status: "approved" | "declined" | "refunded" | "voided" | "other";
