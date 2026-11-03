@@ -39,6 +39,7 @@
     "invalid": "Enter a valid mobile number or account number.",
     "footerHelp": "Need help? Call Customer Care",
     "backToSite": "Back to creditexperts.us",
+    "tooMany": "Too many attempts. Please try again later.",
     "genericError": "Something went wrong. Please try again."
   },
   "Error": {
@@ -61,6 +62,7 @@
     "tryAgainAt": "You can try again at {time}",
     "incorrect": "Incorrect code. {count, plural, one {# attempt} other {# attempts}} left.",
     "expired": "This code has expired. Please request a new one.",
+    "tooMany": "Too many attempts. Please try again later.",
     "genericError": "Something went wrong. Please try again."
   },
   "SelectClient": {

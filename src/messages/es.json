@@ -39,6 +39,7 @@
     "invalid": "Ingrese un número de celular o de cuenta válido.",
     "footerHelp": "¿Necesita ayuda? Llame a Atención al Cliente",
     "backToSite": "Volver a creditexperts.us",
+    "tooMany": "Demasiados intentos. Intente de nuevo más tarde.",
     "genericError": "Algo salió mal. Intente de nuevo."
   },
   "Error": {
@@ -61,6 +62,7 @@
     "tryAgainAt": "Puede intentarlo de nuevo a las {time}",
     "incorrect": "Código incorrecto. {count, plural, one {Le queda # intento} other {Le quedan # intentos}}.",
     "expired": "Este código venció. Pida uno nuevo.",
+    "tooMany": "Demasiados intentos. Intente de nuevo más tarde.",
     "genericError": "Algo salió mal. Intente de nuevo."
   },
   "SelectClient": {

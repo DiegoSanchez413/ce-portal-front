@@ -45,6 +45,7 @@ export function IdentifyStep({ onCodeSent }: Props) {
         setError(`${tCode("locked")} ${tCode("tryAgainAt", { time: formatTime(apiError.until, locale) })}`);
         return;
       }
+      if (response.status === 429) return setError(t("tooMany"));
       setError(response.status === 422 && apiError?.code === "invalid_identifier" ? t("invalid") : t("genericError"));
     } catch {
       setError(t("genericError"));

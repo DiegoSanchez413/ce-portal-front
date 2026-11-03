@@ -18,7 +18,7 @@ type Props = {
   onRestart: () => void;
 };
 
-type CodeError = { kind: "incorrect"; attemptsLeft: number } | { kind: "expired" } | { kind: "generic" };
+type CodeError = { kind: "incorrect"; attemptsLeft: number } | { kind: "expired" } | { kind: "tooMany" } | { kind: "generic" };
 
 // Seis casillas del código, reenvío con contador, cambio de canal y bloqueo por intentos.
 export function CodeStep({ challenge, onChallenge, onResult, onRestart }: Props) {
@@ -38,6 +38,7 @@ export function CodeStep({ challenge, onChallenge, onResult, onRestart }: Props)
     (status: number, body: LoginError | undefined) => {
       if (status === 410) return onRestart();
       if (status === 429 && body?.until) return onChallenge({ ...challenge, resend_available_at: body.until });
+      if (status === 429) return setError({ kind: "tooMany" });
       if (status === 423 && body?.until) {
         setLockedUntil(body.until);
         setDigits(Array(LENGTH).fill(""));
@@ -136,6 +137,8 @@ export function CodeStep({ challenge, onChallenge, onResult, onRestart }: Props)
       ? t("incorrect", { count: error.attemptsLeft })
       : error?.kind === "expired"
         ? t("expired")
+        : error?.kind === "tooMany"
+          ? t("tooMany")
         : error
           ? t("genericError")
           : null;
