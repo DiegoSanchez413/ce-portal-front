@@ -27,6 +27,17 @@ export function PortalShell({ children }: { children: ReactNode }) {
     if (state?.kind === "signed_out") leavePortal(locale);
   }, [state, locale]);
 
+  // Una página restaurada con Atrás tras cerrar sesión se recarga para volver a validar la sesión.
+  useEffect(() => {
+    const onPageShow = (event: PageTransitionEvent) => {
+      if (!event.persisted) return;
+      document.documentElement.style.visibility = "hidden";
+      window.location.reload();
+    };
+    window.addEventListener("pageshow", onPageShow);
+    return () => window.removeEventListener("pageshow", onPageShow);
+  }, []);
+
   useEffect(() => {
     if (state?.kind !== "active" || languageSynced.current) return;
     languageSynced.current = true;
