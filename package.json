@@ -9,7 +9,7 @@
     "lint": "eslint",
     "test": "vitest run",
     "e2e": "playwright test",
-    "api:types": "openapi-typescript ${API_DOCS_URL:-http://localhost:8002/docs} -o src/lib/api/schema.d.ts"
+    "api:types": "openapi-typescript ${API_DOCS_URL:-http://localhost:8004/docs} -o src/lib/api/schema.d.ts"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.105.0",
