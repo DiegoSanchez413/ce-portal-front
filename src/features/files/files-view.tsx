@@ -121,7 +121,7 @@ function DocumentCard({ doc, onUpdate }: { doc: Document; onUpdate: () => void }
           {expiry && <span>{expiry}</span>}
         </div>
       )}
-      {doc.status === "missing" && <span className="text-[13px] font-semibold text-ink-muted">{t(doc.type === "ssn" ? "missingOptional" : "missingHint")}</span>}
+      {doc.status === "missing" && <span className="text-[13px] font-semibold text-ink-muted">{t(doc.type === "ssn" ? "missingRequested" : "missingHint")}</span>}
       {note && (
         <div
           className={cn(

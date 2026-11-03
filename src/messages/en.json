@@ -356,7 +356,7 @@
     "expiredOn": "Expired {date}",
     "expiresIn": "{days, plural, =0 {Expires today} one {Expires in # day} other {Expires in # days}}",
     "missingHint": "We don't have this document yet.",
-    "missingOptional": "Optional. Send it if your agent asks for it.",
+    "missingRequested": "Your agent asked us for this document.",
     "view": "View",
     "update": "Update",
     "viewError": "We couldn't open the file. Please try again.",

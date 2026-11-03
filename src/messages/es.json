@@ -356,7 +356,7 @@
     "expiredOn": "Venció el {date}",
     "expiresIn": "{days, plural, =0 {Vence hoy} one {Vence en # día} other {Vence en # días}}",
     "missingHint": "Aún no tenemos este documento.",
-    "missingOptional": "Opcional. Envíelo si su agente se lo pide.",
+    "missingRequested": "Su agente nos pidió este documento.",
     "view": "Ver",
     "update": "Actualizar",
     "viewError": "No pudimos abrir el archivo. Intente de nuevo.",
