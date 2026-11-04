@@ -35,7 +35,7 @@ export function MyCards({ layout = "list" }: { layout?: "list" | "column" }) {
   const [confirming, setConfirming] = useState<SavedCard | null>(null);
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
-  const [toast, setToast] = useState<string | null>(null);
+  const [toast, setToast] = useState<"changed" | "saved" | null>(null);
   const [adding, setAdding] = useState(false);
   const nextDate = home.data?.payments.state === "current" ? home.data.payments.next_date : null;
   const { ref: fitRef, style: fitStyle } = useFitViewport<HTMLDivElement>(1280);
@@ -48,7 +48,7 @@ export function MyCards({ layout = "list" }: { layout?: "list" | "column" }) {
       if (response.status === 403 && (error as { code?: string } | undefined)?.code === "step_up_required") return "step_up";
       if (!response.ok) return setFailed(true);
       setConfirming(null);
-      setToast(t("changed"));
+      setToast("changed");
       await Promise.all(CARD_QUERIES.map((key) => queryClient.invalidateQueries({ queryKey: [key] })));
     } catch {
       setFailed(true);
@@ -82,11 +82,11 @@ export function MyCards({ layout = "list" }: { layout?: "list" | "column" }) {
       onClose={() => setAdding(false)}
       onSaved={() => {
         setAdding(false);
-        setToast(t("saved"));
+        setToast("saved");
       }}
     />
     {sheet}
-    <Toast message={toast} onDone={() => setToast(null)} />
+    <Toast message={toast && t(toast)} onDone={() => setToast(null)} />
     </>
   );
 

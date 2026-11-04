@@ -551,23 +551,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/session/language": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Save the portal language of the client */
-        post: operations["setLanguage"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/session/logout": {
         parameters: {
             query?: never;
@@ -624,7 +607,7 @@ export interface components {
         };
         LoginError: {
             /** @enum {string} */
-            code: "invalid_identifier" | "turnstile_failed" | "incorrect_code" | "expired_code" | "locked" | "resend_too_soon" | "invalid_challenge" | "send_failed" | "no_email" | "unauthenticated" | "session_expired" | "portal_disabled";
+            code: "invalid_identifier" | "turnstile_failed" | "incorrect_code" | "expired_code" | "locked" | "resend_too_soon" | "too_many_requests" | "invalid_challenge" | "send_failed" | "no_email" | "unauthenticated" | "session_expired" | "portal_disabled";
             message: string;
             attempts_left?: number;
             /** Format: date-time */
@@ -1979,31 +1962,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["PortalSessionInfo"];
                 };
-            };
-        };
-    };
-    setLanguage: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    /** @enum {string} */
-                    language: "en" | "es";
-                };
-            };
-        };
-        responses: {
-            /** @description Saved */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };

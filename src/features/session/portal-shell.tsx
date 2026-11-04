@@ -2,16 +2,17 @@
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocale } from "next-intl";
-import { useEffect, useMemo, useRef, type ReactNode } from "react";
+import { useEffect, useMemo, type ReactNode } from "react";
 import { NoAccess } from "@/features/auth/no-access";
 import { BottomNav } from "@/components/shell/bottom-nav";
 import { PortalHeader } from "@/components/shell/portal-header";
 import { SideNav } from "@/components/shell/side-nav";
+import { useLocaleSwitch } from "@/i18n/client-locale";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { api } from "@/lib/api/client";
 import type { PortalSessionInfo } from "@/lib/api/types";
 import { SessionContext, type SessionActions } from "./session-context";
-import { leavePortal } from "./leave-portal";
+import { LANGUAGE_SYNCED, leavePortal } from "./leave-portal";
 import { fetchSession, SESSION_KEY, type SessionState } from "./session-query";
 
 // Protege las páginas con sesión: sin sesión va al login, sin acceso muestra la pantalla de reactivación.
@@ -20,7 +21,7 @@ export function PortalShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const locale = useLocale();
   const queryClient = useQueryClient();
-  const languageSynced = useRef(false);
+  const localeSwitch = useLocaleSwitch();
   const { data: state } = useQuery({ queryKey: SESSION_KEY, queryFn: fetchSession, refetchOnWindowFocus: "always" });
 
   // Cada cambio de sección vuelve a validar la sesión, así un acceso apagado o una sesión cerrada sacan al cliente.
@@ -43,12 +44,13 @@ export function PortalShell({ children }: { children: ReactNode }) {
     return () => window.removeEventListener("pageshow", onPageShow);
   }, []);
 
+  // El idioma del cliente (leads.language) se aplica una vez por visita; después manda el switch EN/ES de la pestaña.
   useEffect(() => {
-    if (state?.kind !== "active" || languageSynced.current) return;
-    languageSynced.current = true;
+    if (state?.kind !== "active" || sessionStorage.getItem(LANGUAGE_SYNCED) === state.session.account.id) return;
+    sessionStorage.setItem(LANGUAGE_SYNCED, state.session.account.id);
     const saved = state.session.language;
-    if (saved && saved !== locale) router.replace(pathname, { locale: saved });
-  }, [state, locale, pathname, router]);
+    if (saved && saved !== locale) localeSwitch?.setLocale(saved);
+  }, [state, locale, localeSwitch]);
 
   const actions = useMemo<SessionActions | null>(() => {
     if (state?.kind !== "active") return null;
@@ -69,9 +71,6 @@ export function PortalShell({ children }: { children: ReactNode }) {
         void api.POST("/session/switch-account", { body: { account_id: accountId } }).then(({ data }) => {
           if (data) replaceSession(data);
         });
-      },
-      saveLanguage: (language) => {
-        void api.POST("/session/language", { body: { language } }).catch(() => undefined);
       },
     };
   }, [state, queryClient, router, locale]);

@@ -66,8 +66,7 @@
     "expired": "Este código venció. Pida uno nuevo.",
     "tooMany": "Demasiados intentos. Intente de nuevo más tarde.",
     "genericError": "Algo salió mal. Intente de nuevo.",
-    "lockedTitle": "Demasiados intentos.",
-    "useDifferent": "Usar otro número"
+    "lockedTitle": "Demasiados intentos."
   },
   "SelectClient": {
     "title": "¿A qué cuenta desea ingresar?",
@@ -81,7 +80,6 @@
   "NoAccess": {
     "title": "Su cuenta no tiene acceso al portal en este momento",
     "subtitle": "Comuníquese con Atención al Cliente y le ayudaremos.",
-    "call": "Llamar al (855) 517-0390",
     "reactivate": "Quiero reactivar mi servicio",
     "sent": "Recibimos su solicitud. Un especialista se comunicará con usted pronto.",
     "error": "No pudimos enviar su solicitud. Intente de nuevo."

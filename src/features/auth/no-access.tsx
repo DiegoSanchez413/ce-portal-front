@@ -1,6 +1,6 @@
 "use client";
 
-import { CircleCheck, Phone, UserX } from "lucide-react";
+import { CircleCheck, UserX } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Alert } from "@/components/ui/alert";
@@ -9,7 +9,7 @@ import { api } from "@/lib/api/client";
 import type { Reactivation } from "@/lib/api/types";
 import { AuthCard, AuthTitle } from "./ui";
 
-// Pantalla sin acceso: llamada a Customer Care y solicitud de reactivación (una cada 24 h).
+// Pantalla sin acceso: solicitud de reactivación al Specialist (una cada 24 h).
 export function NoAccess({ reactivation }: { reactivation: Reactivation | undefined }) {
   const t = useTranslations("NoAccess");
   const [sent, setSent] = useState(false);
@@ -49,17 +49,9 @@ export function NoAccess({ reactivation }: { reactivation: Reactivation | undefi
         </Alert>
       )}
       {failed && <p className="text-center text-[13px] font-semibold text-danger">{t("error")}</p>}
-      <div className="flex flex-col gap-3">
-        <Button asChild block>
-          <a href="tel:+18555170390">
-            <Phone className="size-[18px]" strokeWidth={2.25} aria-hidden />
-            {t("call")}
-          </a>
-        </Button>
-        <Button variant="outline" block onClick={() => void request()} disabled={blocked || busy || !reactivation?.token}>
-          {t("reactivate")}
-        </Button>
-      </div>
+      <Button block onClick={() => void request()} disabled={blocked || busy || !reactivation?.token}>
+        {t("reactivate")}
+      </Button>
     </AuthCard>
   );
 }

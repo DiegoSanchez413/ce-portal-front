@@ -12,7 +12,7 @@ import { formatTime } from "./countdown";
 import { formatIdentifierInput, isValidIdentifier } from "./identifier";
 import { SessionEndedNotice } from "./session-ended-notice";
 import { getTurnstileToken } from "./turnstile";
-import { AuthCard, AuthTitle, CustomerCareLink } from "./ui";
+import { AuthCard, AuthTitle, CustomerCarePhone } from "./ui";
 
 type Props = {
   onCodeSent: (challenge: CodeChallenge) => void;
@@ -26,13 +26,14 @@ export function IdentifyStep({ onCodeSent }: Props) {
   const inputId = useId();
   const turnstileRef = useRef<HTMLDivElement>(null);
   const [value, setValue] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  // Se guarda qué error hubo, no el texto: al cambiar EN/ES se vuelve a traducir.
+  const [error, setError] = useState<{ kind: "invalid" | "tooMany" | "generic" } | { kind: "locked"; until: string } | null>(null);
   const [sending, setSending] = useState(false);
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!isValidIdentifier(value)) {
-      setError(t("invalid"));
+      setError({ kind: "invalid" });
       return;
     }
 
@@ -46,13 +47,13 @@ export function IdentifyStep({ onCodeSent }: Props) {
 
       if (data) return onCodeSent(data);
       if (response.status === 423 && apiError?.until) {
-        setError(`${tCode("lockedTitle")} ${tCode("tryAgainAt", { time: formatTime(apiError.until, locale) })}`);
+        setError({ kind: "locked", until: apiError.until });
         return;
       }
-      if (response.status === 429) return setError(t("tooMany"));
-      setError(response.status === 422 && apiError?.code === "invalid_identifier" ? t("invalid") : t("genericError"));
+      if (response.status === 429) return setError(apiError?.until ? { kind: "locked", until: apiError.until } : { kind: "tooMany" });
+      setError({ kind: response.status === 422 && apiError?.code === "invalid_identifier" ? "invalid" : "generic" });
     } catch {
-      setError(t("genericError"));
+      setError({ kind: "generic" });
     } finally {
       setSending(false);
     }
@@ -83,7 +84,13 @@ export function IdentifyStep({ onCodeSent }: Props) {
             aria-invalid={error !== null}
             className="h-[52px] px-4 text-base"
           />
-          {error && <InlineMessage>{error}</InlineMessage>}
+          {error && (
+            <InlineMessage>
+              {error.kind === "locked"
+                ? `${tCode("lockedTitle")} ${tCode("tryAgainAt", { time: formatTime(error.until, locale) })}`
+                : t(error.kind === "generic" ? "genericError" : error.kind)}
+            </InlineMessage>
+          )}
           <p className="text-[13px] text-ink-muted">{t("helper")}</p>
         </div>
         <div ref={turnstileRef} />
@@ -93,7 +100,7 @@ export function IdentifyStep({ onCodeSent }: Props) {
       </form>
       <div className="flex flex-col items-center gap-1.5 border-t border-line-soft pt-3 text-center text-[13px] text-ink-muted">
         <span>
-          {t("footerHelp")} <CustomerCareLink />
+          {t("footerHelp")} <CustomerCarePhone />
         </span>
         <Button asChild variant="link" size="inline" className="font-bold">
           <a href="https://creditexperts.us">{t("backToSite")}</a>

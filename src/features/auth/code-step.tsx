@@ -10,7 +10,7 @@ import { api } from "@/lib/api/client";
 import type { CodeChallenge, LoginError, SignInResult } from "@/lib/api/types";
 import { cn } from "@/lib/utils";
 import { formatCountdown, formatTime, useSecondsUntil } from "./countdown";
-import { AuthCard, AuthTitle, CustomerCareLink } from "./ui";
+import { AuthCard, AuthTitle, CustomerCarePhone } from "./ui";
 
 const LENGTH = 6;
 
@@ -21,7 +21,7 @@ type Props = {
   onRestart: () => void;
 };
 
-type CodeError = { kind: "incorrect"; attemptsLeft: number } | { kind: "expired" } | { kind: "tooMany" } | { kind: "generic" };
+type CodeError = { kind: "incorrect"; attemptsLeft: number } | { kind: "expired" } | { kind: "tooMany"; until?: string } | { kind: "generic" };
 
 // Seis casillas del código, reenvío con contador, cambio de canal y bloqueo por intentos.
 export function CodeStep({ challenge, onChallenge, onResult, onRestart }: Props) {
@@ -40,8 +40,8 @@ export function CodeStep({ challenge, onChallenge, onResult, onRestart }: Props)
   const handleError = useCallback(
     (status: number, body: LoginError | undefined) => {
       if (status === 410) return onRestart();
-      if (status === 429 && body?.until) return onChallenge({ ...challenge, resend_available_at: body.until });
-      if (status === 429) return setError({ kind: "tooMany" });
+      if (status === 429 && body?.code === "resend_too_soon" && body.until) return onChallenge({ ...challenge, resend_available_at: body.until });
+      if (status === 429) return setError({ kind: "tooMany", until: body?.until });
       if (status === 423 && body?.until) {
         setLockedUntil(body.until);
         setDigits(Array(LENGTH).fill(""));
@@ -99,7 +99,7 @@ export function CodeStep({ challenge, onChallenge, onResult, onRestart }: Props)
     }
   };
 
-  // Lee el código del SMS cuando el navegador lo permite (WebOTP).
+  // Lee el código del SMS cuando el navegador lo permite (WebOTP) y solo llena las casillas: el cliente confirma con Verify.
   useEffect(() => {
     if (challenge.channel !== "sms" || !("OTPCredential" in window)) return;
     const controller = new AbortController();
@@ -107,14 +107,11 @@ export function CodeStep({ challenge, onChallenge, onResult, onRestart }: Props)
       .get({ otp: { transport: ["sms"] }, signal: controller.signal } as CredentialRequestOptions)
       .then((credential) => {
         const code = (credential as (Credential & { code?: string }) | null)?.code;
-        if (code && /^\d{6}$/.test(code)) {
-          setDigits(code.split(""));
-          void verify(code);
-        }
+        if (code && /^\d{6}$/.test(code)) setDigits(code.split(""));
       })
       .catch(() => undefined);
     return () => controller.abort();
-  }, [challenge.challenge_id, challenge.channel]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [challenge.challenge_id, challenge.channel]);
 
   const fill = (index: number, raw: string) => {
     const typed = raw.replace(/\D/g, "");
@@ -132,7 +129,6 @@ export function CodeStep({ challenge, onChallenge, onResult, onRestart }: Props)
     setDigits(next);
     setError(null);
     inputs.current[Math.min(index + typed.length, LENGTH - 1)]?.focus();
-    if (next.every(Boolean)) void verify(next.join(""));
   };
 
   const keyDown = (index: number, event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -145,7 +141,9 @@ export function CodeStep({ challenge, onChallenge, onResult, onRestart }: Props)
       : error?.kind === "expired"
         ? t("expired")
         : error?.kind === "tooMany"
-          ? t("tooMany")
+          ? error.until
+            ? `${t("lockedTitle")} ${t("tryAgainAt", { time: formatTime(error.until, locale) })}`
+            : t("tooMany")
         : error
           ? t("genericError")
           : null;
@@ -228,23 +226,15 @@ export function CodeStep({ challenge, onChallenge, onResult, onRestart }: Props)
         {challenge.email && (
           <button
             type="button"
-            disabled={locked || busy}
+            disabled={locked || busy || resendIn > 0}
             onClick={() => void send(challenge.channel === "sms" ? "email" : "sms")}
             className="min-h-11 font-bold text-brand hover:underline disabled:text-faint disabled:no-underline"
           >
             {challenge.channel === "sms" ? t("sendEmail") : t("sendPhone")}
           </button>
         )}
-        <button
-          type="button"
-          disabled={busy}
-          onClick={onRestart}
-          className="min-h-11 font-bold text-brand hover:underline disabled:text-faint disabled:no-underline"
-        >
-          {t("useDifferent")}
-        </button>
         <span className="pt-1.5 text-[13px] text-ink-muted">
-          {t("changedNumber")} <CustomerCareLink />
+          {t("changedNumber")} <CustomerCarePhone />
         </span>
       </div>
     </AuthCard>

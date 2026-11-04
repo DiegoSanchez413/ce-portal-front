@@ -66,8 +66,7 @@
     "expired": "This code has expired. Please request a new one.",
     "tooMany": "Too many attempts. Please try again later.",
     "genericError": "Something went wrong. Please try again.",
-    "lockedTitle": "Too many attempts.",
-    "useDifferent": "Use a different number"
+    "lockedTitle": "Too many attempts."
   },
   "SelectClient": {
     "title": "Which account would you like to access?",
@@ -81,7 +80,6 @@
   "NoAccess": {
     "title": "Your account doesn't have portal access right now",
     "subtitle": "Please contact Customer Care and we'll help you.",
-    "call": "Call (855) 517-0390",
     "reactivate": "I want to reactivate my service",
     "sent": "We received your request. A specialist will contact you soon.",
     "error": "We couldn't send your request. Please try again."

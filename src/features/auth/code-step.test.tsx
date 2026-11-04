@@ -43,9 +43,39 @@ describe("pantalla del código", () => {
     expect(screen.getByRole("button", { name: "Send code to my email" })).toBeInTheDocument();
   });
 
+  it("habilita el envío al correo recién cuando termina la espera", () => {
+    renderStep();
+    expect(screen.getByRole("button", { name: "Send code to my email" })).toBeDisabled();
+  });
+
+  it("envía el código al correo después de la espera", async () => {
+    post.mockResolvedValue({ data: { ...challenge, channel: "email", destination: "l*****@gmail.com" }, response: { status: 200 } });
+    renderStep("en", { resend_available_at: new Date(Date.now() - 1000).toISOString() });
+
+    fireEvent.click(screen.getByRole("button", { name: "Send code to my email" }));
+
+    await vi.waitFor(() => expect(post).toHaveBeenCalledWith("/auth/resend", { body: { challenge_id: challenge.challenge_id, channel: "email" } }));
+  });
+
   it("no ofrece el correo cuando el cliente no tiene uno", () => {
     renderStep("en", { email: null });
     expect(screen.queryByRole("button", { name: "Send code to my email" })).not.toBeInTheDocument();
+  });
+
+  it("no ingresa solo al completar el código: espera Verify y manda Keep me signed in", async () => {
+    post.mockResolvedValue({ data: { status: "signed_in" }, error: undefined, response: { status: 200 } });
+    renderStep();
+
+    typeCode("482913");
+    expect(post).not.toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: "Verify" })).toBeEnabled();
+
+    fireEvent.click(screen.getByRole("checkbox", { name: /Keep me signed in/ }));
+    fireEvent.click(screen.getByRole("button", { name: "Verify" }));
+
+    expect(post).toHaveBeenCalledWith("/auth/verify", {
+      body: { challenge_id: challenge.challenge_id, code: "482913", keep_signed_in: true },
+    });
   });
 
   it("muestra los intentos restantes cuando el código es incorrecto", async () => {
@@ -57,6 +87,7 @@ describe("pantalla del código", () => {
     renderStep();
 
     typeCode("482913");
+    fireEvent.click(screen.getByRole("button", { name: "Verify" }));
 
     expect(await screen.findByText("Incorrect code. 3 attempts left.")).toBeInTheDocument();
     expect(post).toHaveBeenCalledWith("/auth/verify", {
@@ -77,6 +108,7 @@ describe("pantalla del código", () => {
     renderStep();
 
     typeCode("000000");
+    fireEvent.click(screen.getByRole("button", { name: "Verify" }));
 
     const time = new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit" }).format(until);
     expect(await screen.findByText(`Too many attempts. You can try again at ${time}`)).toBeInTheDocument();
@@ -85,17 +117,10 @@ describe("pantalla del código", () => {
     expect(screen.getByRole("button", { name: "Send code to my email" })).toBeDisabled();
   });
 
-  it("vuelve a pedir el número con Use a different number", () => {
-    const onRestart = vi.fn();
-    render(
-      <NextIntlClientProvider locale="en" messages={en} timeZone="America/Los_Angeles">
-        <CodeStep challenge={challenge} onChallenge={vi.fn()} onResult={vi.fn()} onRestart={onRestart} />
-      </NextIntlClientProvider>,
-    );
+  it("no ofrece cambiar de número en la pantalla del código", () => {
+    renderStep("en");
 
-    fireEvent.click(screen.getByRole("button", { name: "Use a different number" }));
-
-    expect(onRestart).toHaveBeenCalledOnce();
+    expect(screen.queryByRole("button", { name: "Use a different number" })).toBeNull();
   });
 
   it("traduce el error de intentos en español", async () => {
@@ -107,6 +132,7 @@ describe("pantalla del código", () => {
     renderStep("es");
 
     fireEvent.change(screen.getByLabelText("Dígito 1"), { target: { value: "111111" } });
+    fireEvent.click(screen.getByRole("button", { name: "Verificar" }));
 
     expect(await screen.findByText("Código incorrecto. Le queda 1 intento.")).toBeInTheDocument();
   });

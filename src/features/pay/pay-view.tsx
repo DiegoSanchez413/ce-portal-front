@@ -88,7 +88,8 @@ function Review({
   const [selected, setSelected] = useState<number | typeof NEW_CARD | null>(() => initialCardId(pay) ?? (usable.length === 0 ? NEW_CARD : null));
   const [draft, setDraft] = useState<CardDraft>(() => emptyDraft(usable.length === 0));
   const [busy, setLocalBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // Se guarda la clave del error, no el texto: al cambiar EN/ES se vuelve a traducir.
+  const [error, setError] = useState<"nothingDue" | "inProgress" | "error" | null>(null);
   const idempotencyKey = useRef(crypto.randomUUID());
   const { run, sheet } = useStepUp();
   const expired = expiredDefault(pay.cards);
@@ -135,9 +136,9 @@ function Review({
         return onResult(data);
       }
       idempotencyKey.current = crypto.randomUUID();
-      setError(code === "nothing_due" ? t("nothingDue") : code === "in_progress" ? t("inProgress") : t("error"));
+      setError(code === "nothing_due" ? "nothingDue" : code === "in_progress" ? "inProgress" : "error");
     } catch {
-      setError(t("error"));
+      setError("error");
     } finally {
       working(false);
     }
@@ -198,7 +199,7 @@ function Review({
           {t("declined")}
         </Alert>
       )}
-      {error && <InlineMessage>{error}</InlineMessage>}
+      {error && <InlineMessage>{t(error)}</InlineMessage>}
 
       <ModalActions>
         {selected === NEW_CARD && <MissingNote draft={draft} />}

@@ -8,7 +8,6 @@ export type SessionActions = {
   signOut: () => void;
   switchClient: () => void;
   switchAccount: (accountId: string) => void;
-  saveLanguage: (language: "en" | "es") => void;
 };
 
 export const SessionContext = createContext<SessionActions | null>(null);

@@ -21,7 +21,8 @@ export function SecurityCheck({ open, onVerified, onCancel }: { open: boolean; o
   const locale = useLocale();
   const [challenge, setChallenge] = useState<Challenge | null>(null);
   const [digits, setDigits] = useState<string[]>(() => Array(LENGTH).fill(""));
-  const [error, setError] = useState<string | null>(null);
+  // Se guarda qué error hubo, no el texto: al cambiar EN/ES se vuelve a traducir.
+  const [error, setError] = useState<{ kind: "incorrect"; count: number } | { kind: "expired" | "error" } | null>(null);
   const [lockedUntil, setLockedUntil] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const inputs = useRef<(HTMLInputElement | null)[]>([]);
@@ -31,21 +32,21 @@ export function SecurityCheck({ open, onVerified, onCancel }: { open: boolean; o
 
   const handleError = useCallback(
     (status: number, body: ErrorBody | undefined) => {
-      if (status === 423 && body?.until) {
+      if ((status === 423 || (status === 429 && body?.code !== "resend_too_soon")) && body?.until) {
         setLockedUntil(body.until);
         setDigits(Array(LENGTH).fill(""));
         setError(null);
         return;
       }
-      if (status === 429 && body?.until) {
+      if (status === 429 && body?.code === "resend_too_soon" && body.until) {
         setChallenge((c) => (c ? { ...c, resend_available_at: body.until as string } : c));
         return;
       }
-      if (body?.code === "incorrect_code") return setError(t("incorrect", { count: body.attempts_left ?? 0 }));
-      if (body?.code === "expired_code") return setError(t("expired"));
-      setError(t("error"));
+      if (body?.code === "incorrect_code") return setError({ kind: "incorrect", count: body.attempts_left ?? 0 });
+      if (body?.code === "expired_code") return setError({ kind: "expired" });
+      setError({ kind: "error" });
     },
-    [t],
+    [],
   );
 
   const applySent = useCallback(
@@ -65,7 +66,7 @@ export function SecurityCheck({ open, onVerified, onCancel }: { open: boolean; o
     try {
       applySent(await api.POST("/security/code"));
     } catch {
-      setError(t("error"));
+      setError({ kind: "error" });
     } finally {
       setBusy(false);
     }
@@ -77,7 +78,7 @@ export function SecurityCheck({ open, onVerified, onCancel }: { open: boolean; o
     api
       .POST("/security/code")
       .then((result) => active && applySent(result))
-      .catch(() => active && setError(t("error")));
+      .catch(() => active && setError({ kind: "error" }));
     return () => {
       active = false;
     };
@@ -91,7 +92,7 @@ export function SecurityCheck({ open, onVerified, onCancel }: { open: boolean; o
       if (response.status === 204) return onVerified();
       handleError(response.status, body as ErrorBody | undefined);
     } catch {
-      setError(t("error"));
+      setError({ kind: "error" });
     } finally {
       setBusy(false);
     }
@@ -158,7 +159,7 @@ export function SecurityCheck({ open, onVerified, onCancel }: { open: boolean; o
               />
             ))}
           </div>
-          {error && <InlineMessage>{error}</InlineMessage>}
+          {error && <InlineMessage>{error.kind === "incorrect" ? t("incorrect", { count: error.count }) : t(error.kind)}</InlineMessage>}
         </div>
         <Button type="submit" block disabled={locked || busy || !challenge || digits.some((d) => !d)}>
           {t("verify")}

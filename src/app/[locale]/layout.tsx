@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Providers } from "@/components/providers";
+import { ClientLocaleProvider } from "@/i18n/client-locale";
 import { routing } from "@/i18n/routing";
 import "../globals.css";
 
@@ -38,7 +39,9 @@ export default async function LocaleLayout({
     <html lang={locale} className={`${nunito.variable} h-full antialiased`}>
       <body className="min-h-full">
         <NextIntlClientProvider>
-          <Providers>{children}</Providers>
+          <ClientLocaleProvider initialLocale={locale}>
+            <Providers>{children}</Providers>
+          </ClientLocaleProvider>
         </NextIntlClientProvider>
       </body>
     </html>

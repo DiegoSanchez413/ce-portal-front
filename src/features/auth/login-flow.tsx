@@ -1,8 +1,10 @@
 "use client";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useTranslations } from "next-intl";
+import { LoaderCircle } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+import { LANGUAGE_SYNCED } from "@/features/session/leave-portal";
 import { fetchSession, SESSION_KEY } from "@/features/session/session-query";
 import { useRouter } from "@/i18n/navigation";
 import { api } from "@/lib/api/client";
@@ -22,17 +24,21 @@ type Step =
 // Ingreso completo: identificar, código, selector de cliente y, según el caso, sin acceso o al portal.
 export function LoginFlow() {
   const router = useRouter();
+  const locale = useLocale();
   const queryClient = useQueryClient();
   const t = useTranslations("Login");
   const [step, setStep] = useState<Step>({ name: "identify" });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(false);
-  const { data: session } = useQuery({ queryKey: SESSION_KEY, queryFn: fetchSession, retry: false });
+  const common = useTranslations("Common");
+  const { data: session, isPending } = useQuery({ queryKey: SESSION_KEY, queryFn: fetchSession, retry: false });
 
-  // Con sesión abierta no se muestra el login: va al mismo destino que tras ingresar.
+  // Con sesión abierta no se muestra el login: va a Inicio ya en el idioma del cliente, sin un segundo cambio en el portal.
   useEffect(() => {
-    if (session?.kind === "active") router.replace("/");
-  }, [session, router]);
+    if (session?.kind !== "active") return;
+    sessionStorage.setItem(LANGUAGE_SYNCED, session.session.account.id);
+    router.replace("/", { locale: session.session.language ?? locale });
+  }, [session, router, locale]);
 
   const restart = () => setStep({ name: "identify" });
 
@@ -65,6 +71,16 @@ export function LoginFlow() {
       setBusy(false);
     }
   };
+
+  // Mientras se sabe si hay sesión (o se está entrando al portal) no se dibuja el formulario.
+  if (isPending || session?.kind === "active") {
+    return (
+      <div aria-busy className="flex flex-1 items-center justify-center py-24">
+        <LoaderCircle className="size-8 animate-spin text-brand" aria-hidden />
+        <span className="sr-only">{common("loading")}</span>
+      </div>
+    );
+  }
 
   switch (step.name) {
     case "identify":

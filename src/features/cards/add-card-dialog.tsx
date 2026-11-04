@@ -31,21 +31,21 @@ function AddCardBody({ setDefault, busy, setBusy, onClose, onSaved }: { setDefau
   const queryClient = useQueryClient();
   const { run, sheet } = useStepUp();
   const [draft, setDraft] = useState<CardDraft>(() => emptyDraft(setDefault));
-  const [failed, setFailed] = useState<string | null>(null);
+  const [failed, setFailed] = useState(false);
   const missing = Object.keys(validateDraft(draft)) as CardField[];
 
   const save = async (): Promise<"step_up" | void> => {
     setBusy(true);
-    setFailed(null);
+    setFailed(false);
     try {
       const { error, response } = await api.POST("/cards", { body: toNewCard(draft) });
       const body = error as { code?: string; message?: string } | undefined;
       if (response.status === 403 && body?.code === "step_up_required") return "step_up";
-      if (!response.ok) return setFailed(body?.message ?? t("saveError"));
+      if (!response.ok) return setFailed(true);
       await Promise.all(CARD_QUERIES.map((key) => queryClient.invalidateQueries({ queryKey: [key] })));
       onSaved();
     } catch {
-      setFailed(t("saveError"));
+      setFailed(true);
     } finally {
       setBusy(false);
     }
@@ -54,7 +54,7 @@ function AddCardBody({ setDefault, busy, setBusy, onClose, onSaved }: { setDefau
   return (
     <>
       <CardForm draft={draft} onChange={setDraft} showErrors={false} defaultLabel="useForMonthly" />
-      {failed && <InlineMessage>{failed}</InlineMessage>}
+      {failed && <InlineMessage>{t("saveError")}</InlineMessage>}
       <ModalActions>
         <MissingNote draft={draft} />
         <Button variant="ghost" size="md" disabled={busy} onClick={onClose}>

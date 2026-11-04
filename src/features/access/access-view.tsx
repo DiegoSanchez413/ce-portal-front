@@ -24,7 +24,7 @@ export function AccessView() {
   const query = usePortalQuery("access-devices", () => api.GET("/access/devices"));
   const [open, setOpen] = useState<string | null>(null);
   const [confirming, setConfirming] = useState<Confirm | null>(null);
-  const [toast, setToast] = useState<string | null>(null);
+  const [toast, setToast] = useState<"signedOut" | "deviceSignedOut" | null>(null);
   const clearToast = useCallback(() => setToast(null), []);
   const others = query.data?.some((device) => !device.current && device.active) ?? false;
 
@@ -60,12 +60,12 @@ export function AccessView() {
           onClose={() => setConfirming(null)}
           onDone={() => {
             setConfirming(null);
-            setToast(confirming.kind === "others" ? t("signedOut") : t("deviceSignedOut"));
+            setToast(confirming.kind === "others" ? "signedOut" : "deviceSignedOut");
             void query.refetch();
           }}
         />
       )}
-      <Toast message={toast} onDone={clearToast} />
+      <Toast message={toast && t(toast)} onDone={clearToast} />
     </div>
   );
 }
