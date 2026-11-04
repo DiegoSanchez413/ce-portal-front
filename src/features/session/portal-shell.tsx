@@ -21,7 +21,12 @@ export function PortalShell({ children }: { children: ReactNode }) {
   const locale = useLocale();
   const queryClient = useQueryClient();
   const languageSynced = useRef(false);
-  const { data: state } = useQuery({ queryKey: SESSION_KEY, queryFn: fetchSession });
+  const { data: state } = useQuery({ queryKey: SESSION_KEY, queryFn: fetchSession, refetchOnWindowFocus: "always" });
+
+  // Cada cambio de sección vuelve a validar la sesión, así un acceso apagado o una sesión cerrada sacan al cliente.
+  useEffect(() => {
+    void queryClient.invalidateQueries({ queryKey: SESSION_KEY });
+  }, [pathname, queryClient]);
 
   useEffect(() => {
     if (state?.kind === "signed_out") leavePortal(locale);
