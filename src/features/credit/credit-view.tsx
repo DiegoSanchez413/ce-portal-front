@@ -3,14 +3,19 @@
 import { Download, FileChartColumn } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
-import { Card, CardLabel, ErrorNote, PageHeader, QueryState, smallOutlineButton } from "@/features/portal/ui";
+import { InlineMessage } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Card, CardLabel } from "@/components/ui/card";
+import { IconTile } from "@/components/ui/choice";
+import { DataTable } from "@/components/ui/data-table";
+import { PageHeader, QueryState } from "@/components/ui/feedback";
 import { usePortalQuery } from "@/features/portal/use-portal-query";
 import { api } from "@/lib/api/client";
 import type { CreditReport } from "@/lib/api/types";
 import { formatDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { ChartLegend, ScoreChart } from "./score-chart";
-import { BUREAU_COLORS, BUREAUS, formatDelta, RANGE_STYLES, scoreRange } from "./score";
+import { BUREAU_COLORS, BUREAUS, formatDelta, RANGE_TEXT, scoreRange } from "./score";
 import { DeltaChip, RangeChip, ScoreTile } from "./score-tile";
 
 // My credit: gráfico de evolución y lista de Credit Reports con su PDF.
@@ -25,9 +30,9 @@ export function CreditView() {
       <QueryState loading={query.isPending} error={query.isError} onRetry={() => void query.refetch()} />
       {reports && reports.length === 0 && (
         <Card className="items-center gap-3.5 px-6 py-9 text-center">
-          <span className="flex size-16 items-center justify-center rounded-full bg-brand-soft text-brand">
+          <IconTile tone="brand-soft" shape="circle" className="size-16">
             <FileChartColumn className="size-7" strokeWidth={2.25} aria-hidden />
-          </span>
+          </IconTile>
           <p className="text-[17px] leading-snug font-extrabold">{t("empty")}</p>
         </Card>
       )}
@@ -68,37 +73,34 @@ function ReportList({ reports }: { reports: CreditReport[] }) {
           </Card>
         ))}
       </div>
-      <Card className="hidden gap-0 px-6 py-2 lg:flex">
-        <div className="grid grid-cols-[1.2fr_1fr_1fr_1fr_96px] gap-4 border-b border-line-soft py-3.5 text-[11px] font-extrabold tracking-[.06em] text-[#9CA3AF] uppercase">
-          <span>{t("report")}</span>
-          {BUREAUS.map((bureau) => (
-            <span key={bureau} style={{ color: BUREAU_COLORS[bureau] }}>
-              {t(`bureaus.${bureau}`)}
-            </span>
-          ))}
-          <span />
-        </div>
-        {reports.map((report) => (
-          <div key={report.id} className="grid grid-cols-[1.2fr_1fr_1fr_1fr_96px] items-center gap-4 border-b border-line-soft py-3.5 last:border-b-0">
-            <span className="text-[15px] font-extrabold">{formatDate(report.date, locale)}</span>
-            {BUREAUS.map((bureau) => {
+      <DataTable
+        className="hidden lg:flex"
+        template="1.2fr 1fr 1fr 1fr 96px"
+        rowClassName="py-3.5"
+        rows={reports}
+        rowKey={(report) => report.id}
+        columns={[
+          { key: "date", header: t("report"), cell: (report) => <span className="text-[15px] font-extrabold">{formatDate(report.date, locale)}</span> },
+          ...BUREAUS.map((bureau) => ({
+            key: bureau,
+            header: <span style={{ color: BUREAU_COLORS[bureau] }}>{t(`bureaus.${bureau}`)}</span>,
+            className: "flex flex-wrap items-center gap-1.5",
+            cell: (report: CreditReport) => {
               const { score, delta } = report[bureau];
               const range = score === null ? null : scoreRange(score);
               return (
-                <span key={bureau} className="flex flex-wrap items-center gap-1.5">
-                  <span className="text-lg font-extrabold" style={{ color: range ? RANGE_STYLES[range].fg : "#9CA3AF" }}>
-                    {score ?? "—"}
-                  </span>
+                <>
+                  <span className={cn("text-lg font-extrabold", RANGE_TEXT[range ?? "none"])}>{score ?? "—"}</span>
                   {range && <RangeChip range={range} />}
                   {delta !== null && <DeltaChip delta={formatDelta(delta)} />}
-                  {report.first_report && score !== null && <span className="text-[11px] font-bold text-[#9CA3AF]">{t("firstReport")}</span>}
-                </span>
+                  {report.first_report && score !== null && <span className="text-[11px] font-bold text-faint">{t("firstReport")}</span>}
+                </>
               );
-            })}
-            <span className="flex justify-end">{report.has_pdf && <DownloadButton id={report.id} label="PDF" compact />}</span>
-          </div>
-        ))}
-      </Card>
+            },
+          })),
+          { key: "pdf", header: "", className: "flex justify-end", cell: (report) => report.has_pdf && <DownloadButton id={report.id} label="PDF" compact /> },
+        ]}
+      />
     </>
   );
 }
@@ -128,11 +130,11 @@ function DownloadButton({ id, label, compact = false }: { id: number; label: str
 
   return (
     <div className={cn("flex flex-col gap-1.5", compact && "items-end")}>
-      <button type="button" onClick={() => void download()} disabled={busy} className={cn(smallOutlineButton, compact ? "w-24" : "w-full")}>
+      <Button variant="outline" size="sm" onClick={() => void download()} disabled={busy} className={compact ? "w-24" : "w-full"}>
         <Download className="size-4" strokeWidth={2.5} aria-hidden />
         {label}
-      </button>
-      {failed && <ErrorNote>{t("downloadError")}</ErrorNote>}
+      </Button>
+      {failed && <InlineMessage>{t("downloadError")}</InlineMessage>}
     </div>
   );
 }

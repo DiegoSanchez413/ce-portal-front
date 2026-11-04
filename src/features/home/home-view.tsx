@@ -6,7 +6,12 @@ import { useState } from "react";
 import { ScoreTile } from "@/features/credit/score-tile";
 import { BUREAUS } from "@/features/credit/score";
 import { lateBreakdown } from "@/features/payments/history";
-import { Card, CardLabel, Chip, ErrorNote, outlineButton, primaryButton, QueryState, SuccessNote } from "@/features/portal/ui";
+import { Alert, InlineMessage } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardLabel } from "@/components/ui/card";
+import { IconTile } from "@/components/ui/choice";
+import { QueryState } from "@/components/ui/feedback";
 import { usePortalQuery } from "@/features/portal/use-portal-query";
 import { useSession } from "@/features/session/session-context";
 import { Link } from "@/i18n/navigation";
@@ -14,10 +19,10 @@ import { api } from "@/lib/api/client";
 import type { Home } from "@/lib/api/types";
 import { formatClock, formatDate, formatMoney, formatShortDate, formatWeekdayDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { PayNowButton } from "@/features/pay/pay-view";
 import { ContactCard } from "./contact-card";
 import { attentionColor } from "@/features/files/documents";
 
-const linkArrow = "flex min-h-11 items-center text-sm font-extrabold text-brand hover:text-[#db5a15]";
 
 // Inicio: plan, scores, pagos, próxima cita, avance de disputas y contacto.
 export function HomeView() {
@@ -57,9 +62,9 @@ function PlanCard({ plan }: { plan: NonNullable<Home["plan"]> }) {
     <Card>
       <div className="flex items-center justify-between gap-2">
         <CardLabel>{t("myPlan")}</CardLabel>
-        <Chip fg={done ? "#1F2A44" : "#15803D"} bg={done ? "#EEF0F3" : "#DCFCE7"}>
+        <Badge tone={done ? "neutral" : "success"}>
           {done ? t("planCompleted") : t("planActive")}
-        </Chip>
+        </Badge>
       </div>
       <p className="text-2xl leading-[1.1] font-extrabold">{plan.name}</p>
       <div className="flex flex-col gap-2">
@@ -91,9 +96,9 @@ function ScoresCard({ scores }: { scores: Home["scores"] }) {
           </div>
           <div className="flex flex-wrap items-center justify-between gap-2">
             <span className="text-[13px] font-semibold text-ink-muted">{t("lastReport", { date: formatDate(scores.date, locale) })}</span>
-            <Link href="/credit" className={linkArrow}>
-              {t("seeCredit")} ›
-            </Link>
+            <Button asChild variant="link" size="inline" className="min-h-11 self-start text-sm hover:no-underline">
+              <Link href="/credit">{t("seeCredit")} ›</Link>
+            </Button>
           </div>
         </>
       ) : (
@@ -114,24 +119,22 @@ function PaymentsCard({ payments, cardAlert }: { payments: Home["payments"]; car
     const count = payments.pending_count ?? 0;
     const monthly = payments.monthly_amount ?? 0;
     return (
-      <section className="flex flex-col gap-3 rounded-2xl border-[1.5px] border-brand bg-[#fff7ed] p-5 shadow-[0_4px_20px_rgba(242,106,33,.12)]">
+      <section className="flex flex-col gap-3 rounded-2xl border-[1.5px] border-brand bg-brand-wash p-5 shadow-[0_4px_20px_color-mix(in_srgb,var(--color-brand)_12%,transparent)]">
         <CardLabel className="text-brand-strong">{t("payments")}</CardLabel>
         <div className="flex items-start gap-3">
-          <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-brand text-white">
+          <IconTile tone="brand" shape="circle">
             <TriangleAlert className="size-5" strokeWidth={2.5} aria-hidden />
-          </span>
+          </IconTile>
           <div className="flex flex-col gap-0.5">
             <span className="text-[17px] leading-snug font-extrabold">
               {t("lateTitle", { count, amount: formatMoney(payments.amount_due ?? count * monthly) })}
             </span>
-            <span className="text-[13px] font-semibold text-[#4b5563]">{lateBreakdown(count, monthly)}</span>
-            <span className="text-[13px] font-semibold text-[#4b5563]">{t("lateSub")}</span>
+            <span className="text-[13px] font-semibold text-body">{lateBreakdown(count, monthly)}</span>
+            <span className="text-[13px] font-semibold text-body">{t("lateSub")}</span>
           </div>
         </div>
         {cardAlert && <CardAlert alert={cardAlert} />}
-        <Link href="/payments/pay" className={cn(primaryButton, "min-h-12 text-[15px]")}>
-          {t("payNow")}
-        </Link>
+        <PayNowButton size="md" block>{t("payNow")}</PayNowButton>
       </section>
     );
   }
@@ -152,9 +155,9 @@ function PaymentsCard({ payments, cardAlert }: { payments: Home["payments"]; car
         </div>
       )}
       {cardAlert && <CardAlert alert={cardAlert} />}
-      <Link href="/payments" className={linkArrow}>
-        {t("seePayments")} ›
-      </Link>
+      <Button asChild variant="link" size="inline" className="min-h-11 self-start text-sm hover:no-underline">
+        <Link href="/payments">{t("seePayments")} ›</Link>
+      </Button>
     </Card>
   );
 }
@@ -168,11 +171,11 @@ function CardAlert({ alert }: { alert: NonNullable<Home["card_alert"]> }) {
       role="status"
       className={cn(
         "flex flex-wrap items-center justify-between gap-2 rounded-xl border px-3.5 py-2.5 text-sm font-bold",
-        expired ? "border-[#fecaca] bg-[#fef2f2] text-[#991b1b]" : "border-[#fde68a] bg-[#fffbeb] text-[#92400e]",
+        expired ? "border-danger-line bg-danger-tint text-danger-text" : "border-warning-line bg-warning-tint text-warning-strong",
       )}
     >
       <span className="flex items-center gap-2">
-        <CreditCard className={cn("size-[18px] shrink-0", expired ? "text-[#dc2626]" : "text-[#d97706]")} strokeWidth={2.25} aria-hidden />
+        <CreditCard className={cn("size-[18px] shrink-0", expired ? "text-danger" : "text-warning-accent")} strokeWidth={2.25} aria-hidden />
         {expired ? t("cardExpired") : t("cardExpiring", { expiration: alert.expiration })}
       </span>
       <Link href="/payments#my-cards" className="flex min-h-10 items-center rounded-full px-2 font-extrabold underline">
@@ -200,25 +203,23 @@ function LoyalCard({ amountDue, cardAlert }: { amountDue: number | null; cardAle
     <Card className="gap-3">
       <CardLabel>{t("payments")}</CardLabel>
       <div className="flex items-start gap-3">
-        <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-range-good-bg text-range-good">
+        <IconTile tone="success" shape="circle">
           <Check className="size-5" strokeWidth={2.5} aria-hidden />
-        </span>
+        </IconTile>
         <div className="flex flex-col gap-0.5">
           <span className="text-[17px] leading-snug font-extrabold">{t("loyalTitle")}</span>
-          <span className="text-[13px] font-semibold text-[#4b5563]">{t("loyalSub")}</span>
+          <span className="text-[13px] font-semibold text-body">{t("loyalSub")}</span>
         </div>
       </div>
       {cardAlert && <CardAlert alert={cardAlert} />}
       {amountDue !== null && amountDue > 0 && (
-        <Link href="/payments/pay" className={cn(primaryButton, "min-h-12 text-[15px]")}>
-          {t("payNow")}
-        </Link>
+        <PayNowButton size="md" block>{t("payNow")}</PayNowButton>
       )}
-      {state === "sent" && <SuccessNote>{t("loyalConfirm")}</SuccessNote>}
-      {state === "error" && <ErrorNote>{t("requestError")}</ErrorNote>}
-      <button type="button" onClick={() => void request()} disabled={state === "busy" || state === "sent"} className={cn(outlineButton, "min-h-12 text-[15px]")}>
+      {state === "sent" && <Alert tone="success">{t("loyalConfirm")}</Alert>}
+      {state === "error" && <InlineMessage>{t("requestError")}</InlineMessage>}
+      <Button variant="outline" size="md" block onClick={() => void request()} disabled={state === "busy" || state === "sent"}>
         {t("loyalButton")}
-      </button>
+      </Button>
     </Card>
   );
 }
@@ -239,9 +240,9 @@ function FilesCard({ files }: { files: Home["files"] }) {
                 {doc.status === "approved" && doc.expires_in_days !== null ? tf("expiresIn", { days: doc.expires_in_days }) : tf(`status.${doc.status}`)}
               </span>
             </div>
-            <Link href={{ pathname: "/files", query: { update: doc.type } }} className={cn(outlineButton, "min-h-11 w-auto shrink-0 px-[18px] text-sm")}>
-              {t("update")}
-            </Link>
+            <Button asChild variant="outline" size="sm" className="px-[18px]">
+              <Link href={{ pathname: "/files", query: { update: doc.type } }}>{t("update")}</Link>
+            </Button>
           </li>
         ))}
       </ul>
@@ -296,12 +297,12 @@ function DisputeCard({ dispute }: { dispute: Home["dispute"] }) {
             <span
               className={cn(
                 "flex size-7 shrink-0 items-center justify-center rounded-full border-2",
-                dispute.window_closed ? "border-brand bg-brand-soft text-brand" : "border-line-strong bg-card text-[#9CA3AF]",
+                dispute.window_closed ? "border-brand bg-brand-soft text-brand" : "border-line-strong bg-card text-faint",
               )}
             >
               {dispute.window_closed ? <Eye className="size-3.5" strokeWidth={2.5} aria-hidden /> : <Clock className="size-3.5" strokeWidth={2.5} aria-hidden />}
             </span>
-            <span className="pt-1 text-[15px] font-bold text-[#4b5563]">
+            <span className="pt-1 text-[15px] font-bold text-body">
               {dispute.window_closed
                 ? t("windowClosed", { date: formatShortDate(dispute.respond_by, locale) })
                 : t("respondBy", { date: formatShortDate(dispute.respond_by, locale) })}

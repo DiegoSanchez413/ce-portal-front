@@ -1,10 +1,13 @@
 import { jsPDF } from "jspdf";
 import { formatMoney } from "@/lib/format";
+import { colors } from "@/lib/theme/colors";
 
-const MUTED: [number, number, number] = [100, 116, 139];
-const LINE: [number, number, number] = [226, 232, 240];
-const ACCENT: [number, number, number] = [234, 88, 12];
-const INK: [number, number, number] = [15, 23, 42];
+// jsPDF pide los colores como [r, g, b]: se toman de la paleta global.
+const rgb = (hex: string): [number, number, number] => [0, 2, 4].map((i) => parseInt(hex.slice(1 + i, 3 + i), 16)) as [number, number, number];
+const MUTED = rgb(colors["ink-muted"]);
+const LINE = rgb(colors.line);
+const ACCENT = rgb(colors.brand);
+const INK = rgb(colors.navy);
 // Ancho fijo tipo recibo (≈ 400 px); el alto se ajusta al contenido.
 const WIDTH = 300;
 const MARGIN = 24;

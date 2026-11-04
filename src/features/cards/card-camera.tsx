@@ -3,6 +3,7 @@
 import { Camera, Check, Image as ImageIcon, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
 
 const CARD_RATIO = 85.6 / 53.98;
 const MAX_SIDE = 1280;
@@ -86,12 +87,12 @@ export function CardCamera({ onCapture, onGallery, onManual, onClose }: { onCapt
         <p className="text-center text-base font-bold">{blocked ? "" : t("cameraHint")}</p>
         <div
           ref={frame}
-          className="relative w-full max-w-[420px] rounded-2xl border-[3px] border-white/90 shadow-[0_0_0_9999px_rgba(0,0,0,.45)]"
+          className="relative w-full max-w-[420px] rounded-2xl border-[3px] border-white/90 shadow-[0_0_0_9999px_color-mix(in_srgb,black_45%,transparent)]"
           style={{ aspectRatio: String(CARD_RATIO) }}
         >
           {captured && (
             <span className="absolute inset-0 flex items-center justify-center">
-              <span className="flex size-14 items-center justify-center rounded-full bg-whatsapp">
+              <span className="flex size-14 items-center justify-center rounded-full bg-success-accent">
                 <Check className="size-7" strokeWidth={3} aria-hidden />
               </span>
             </span>
@@ -100,9 +101,9 @@ export function CardCamera({ onCapture, onGallery, onManual, onClose }: { onCapt
         {blocked && (
           <div role="alert" className="flex max-w-sm flex-col items-center gap-3 rounded-2xl bg-white p-5 text-center text-navy">
             <p className="text-sm font-semibold">{t(status === "denied" ? "cameraDenied" : "cameraUnavailable")}</p>
-            <button type="button" onClick={onGallery} className="min-h-11 rounded-full bg-brand px-5 font-extrabold text-white">
+            <Button size="sm" onClick={onGallery}>
               {t("cameraGallery")}
-            </button>
+            </Button>
           </div>
         )}
         <button type="button" onClick={onManual} className="min-h-11 rounded-full px-4 text-sm font-extrabold underline">

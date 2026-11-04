@@ -29,7 +29,7 @@ export function PortalShell({ children }: { children: ReactNode }) {
   }, [pathname, queryClient]);
 
   useEffect(() => {
-    if (state?.kind === "signed_out") leavePortal(locale);
+    if (state?.kind === "signed_out") leavePortal(locale, state.reason);
   }, [state, locale]);
 
   // Una página restaurada con Atrás tras cerrar sesión se recarga para volver a validar la sesión.

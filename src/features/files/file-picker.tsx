@@ -3,7 +3,8 @@
 import { Camera, FileText, Upload, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { outlineButton, primaryButton } from "@/features/portal/ui";
+import { InlineMessage } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import { ACCEPT_ATTR, ACCEPTED_TYPES, checkFiles, MAX_FILE_BYTES, type FileProblem } from "./documents";
 
 // Take a photo / Choose files con miniaturas; descarta lo que no cumple tipo, tamaño o cantidad.
@@ -39,14 +40,14 @@ export function FilePicker({
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-col gap-2.5">
-        <button type="button" onClick={() => cameraRef.current?.click()} disabled={files.length >= max} className={primaryButton}>
+        <Button block onClick={() => cameraRef.current?.click()} disabled={files.length >= max}>
           <Camera className="size-5" aria-hidden />
           {t("takePhoto")}
-        </button>
-        <button type="button" onClick={() => pickerRef.current?.click()} disabled={files.length >= max} className={outlineButton}>
+        </Button>
+        <Button variant="outline" block onClick={() => pickerRef.current?.click()} disabled={files.length >= max}>
           <Upload className="size-5" aria-hidden />
           {t("chooseFiles")}
-        </button>
+        </Button>
       </div>
       <input
         ref={cameraRef}
@@ -82,11 +83,7 @@ export function FilePicker({
         </ul>
       )}
       <span className="text-xs font-semibold text-ink-muted">{t("hint", { max })}</span>
-      {problem && (
-        <p role="alert" className="text-[13px] font-semibold text-danger">
-          {t(`problems.${problem}`, { max })}
-        </p>
-      )}
+      {problem && <InlineMessage>{t(`problems.${problem}`, { max })}</InlineMessage>}
     </div>
   );
 }
@@ -101,7 +98,7 @@ function Thumb({ file, onRemove }: { file: File; onRemove: () => void }) {
   }, [url]);
 
   return (
-    <li className="relative flex size-[72px] items-center justify-center rounded-xl border border-line bg-gradient-to-br from-[#dce3ec] to-[#f3f4f6]">
+    <li className="relative flex size-[72px] items-center justify-center rounded-xl border border-line bg-gradient-to-br from-line to-line-cool">
       {url ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={url} alt={file.name} className="size-full rounded-xl object-cover" />

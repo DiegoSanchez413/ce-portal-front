@@ -17,9 +17,9 @@ describe("scoreRange", () => {
 
 describe("formatDelta", () => {
   it("marca las subidas en verde, las bajadas en rojo y sin cambio en gris", () => {
-    expect(formatDelta(12)).toMatchObject({ text: "+12", fg: "#15803D" });
-    expect(formatDelta(-5)).toMatchObject({ text: "-5", fg: "#B91C1C" });
-    expect(formatDelta(0)).toMatchObject({ text: "0", fg: "#4B5563" });
+    expect(formatDelta(12)).toEqual({ text: "+12", tone: "success" });
+    expect(formatDelta(-5)).toEqual({ text: "-5", tone: "danger" });
+    expect(formatDelta(0)).toEqual({ text: "0", tone: "neutral" });
   });
 });
 

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Document } from "@/lib/api/types";
-import { attentionColor, canUpdate, canView, checkFiles, documentNote, MAX_FILE_BYTES, STATUS_COLORS } from "./documents";
+import { colors } from "@/lib/theme/colors";
+import { attentionColor, canUpdate, canView, checkFiles, documentNote, MAX_FILE_BYTES, STATUS_TONES } from "./documents";
 
 const doc = (over: Partial<Document>): Document => ({
   type: "id",
@@ -14,10 +15,10 @@ const doc = (over: Partial<Document>): Document => ({
 
 describe("document rules", () => {
   it("colors each status like the mockup", () => {
-    expect(STATUS_COLORS.approved.fg).toBe("#15803D");
-    expect(STATUS_COLORS.in_review.bg).toBe("#DBEAFE");
-    expect(STATUS_COLORS.rejected).toEqual(STATUS_COLORS.expired);
-    expect(STATUS_COLORS.missing.fg).toBe("#4B5563");
+    expect(STATUS_TONES.approved).toBe("success");
+    expect(STATUS_TONES.in_review).toBe("info");
+    expect(STATUS_TONES.rejected).toBe(STATUS_TONES.expired);
+    expect(STATUS_TONES.missing).toBe("neutral");
   });
 
   it("warns when an approved document expires in 30 days or less", () => {
@@ -42,9 +43,9 @@ describe("document rules", () => {
   });
 
   it("uses amber for expiring, gray for missing and red otherwise on Home", () => {
-    expect(attentionColor(doc({ expires_in_days: 10 }))).toBe("#B45309");
-    expect(attentionColor(doc({ status: "missing" }))).toBe("#4B5563");
-    expect(attentionColor(doc({ status: "expired" }))).toBe("#DC2626");
+    expect(attentionColor(doc({ expires_in_days: 10 }))).toBe(colors.warning);
+    expect(attentionColor(doc({ status: "missing" }))).toBe(colors.body);
+    expect(attentionColor(doc({ status: "expired" }))).toBe(colors.danger);
   });
 });
 

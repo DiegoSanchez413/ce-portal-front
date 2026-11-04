@@ -16,6 +16,7 @@ export type Payments = Schemas["Payments"];
 export type PaymentItem = Schemas["PaymentItem"];
 export type Receipt = Schemas["Receipt"];
 export type Profile = Schemas["Profile"];
+export type AccessDevice = Schemas["AccessDevice"];
 export type AccessSession = Schemas["AccessSession"];
 export type Card = Schemas["Card"];
 export type NewCard = Schemas["NewCard"];

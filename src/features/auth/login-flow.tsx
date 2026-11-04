@@ -1,8 +1,9 @@
 "use client";
 
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { fetchSession, SESSION_KEY } from "@/features/session/session-query";
 import { useRouter } from "@/i18n/navigation";
 import { api } from "@/lib/api/client";
 import type { ClientOption, CodeChallenge, Reactivation, SignInResult } from "@/lib/api/types";
@@ -10,7 +11,7 @@ import { CodeStep } from "./code-step";
 import { IdentifyStep } from "./identify-step";
 import { NoAccess } from "./no-access";
 import { SelectClientStep } from "./select-client-step";
-import { FieldError } from "./ui";
+import { InlineMessage } from "@/components/ui/alert";
 
 type Step =
   | { name: "identify" }
@@ -26,6 +27,12 @@ export function LoginFlow() {
   const [step, setStep] = useState<Step>({ name: "identify" });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(false);
+  const { data: session } = useQuery({ queryKey: SESSION_KEY, queryFn: fetchSession, retry: false });
+
+  // Con sesión abierta no se muestra el login: va al mismo destino que tras ingresar.
+  useEffect(() => {
+    if (session?.kind === "active") router.replace("/");
+  }, [session, router]);
 
   const restart = () => setStep({ name: "identify" });
 
@@ -81,7 +88,7 @@ export function LoginFlow() {
             onSelect={(leadId) => void selectClient(step.challengeId, leadId, step.keepSignedIn)}
             onUseDifferentNumber={restart}
           />
-          {error && <FieldError className="justify-center">{t("genericError")}</FieldError>}
+          {error && <InlineMessage className="justify-center">{t("genericError")}</InlineMessage>}
         </div>
       );
     case "no_access":

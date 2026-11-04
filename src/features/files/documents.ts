@@ -1,4 +1,6 @@
+import type { BadgeTone } from "@/components/ui/badge";
 import type { Document } from "@/lib/api/types";
+import { colors } from "@/lib/theme/colors";
 
 export type DocumentType = Document["type"];
 export type DocumentStatus = Document["status"];
@@ -10,12 +12,12 @@ export const MAX_DOCUMENT_FILES = 3;
 export const MAX_LETTER_FILES = 10;
 export const EXPIRING_DAYS = 30;
 
-export const STATUS_COLORS: Record<DocumentStatus, { fg: string; bg: string }> = {
-  approved: { fg: "#15803D", bg: "#DCFCE7" },
-  in_review: { fg: "#1D4ED8", bg: "#DBEAFE" },
-  rejected: { fg: "#B91C1C", bg: "#FEE2E2" },
-  expired: { fg: "#B91C1C", bg: "#FEE2E2" },
-  missing: { fg: "#4B5563", bg: "#EEF0F3" },
+export const STATUS_TONES: Record<DocumentStatus, BadgeTone> = {
+  approved: "success",
+  in_review: "info",
+  rejected: "danger",
+  expired: "danger",
+  missing: "neutral",
 };
 
 export type DocumentNote = { kind: "warn"; days: number } | { kind: "error"; reason: string } | null;
@@ -39,9 +41,9 @@ export function canUpdate(doc: Document): boolean {
 
 // Color del estado corto que muestra la tarjeta My Files de Inicio.
 export function attentionColor(doc: Document): string {
-  if (doc.status === "approved") return "#B45309";
-  if (doc.status === "missing") return "#4B5563";
-  return "#DC2626";
+  if (doc.status === "approved") return colors.warning;
+  if (doc.status === "missing") return colors.body;
+  return colors.danger;
 }
 
 export type FileProblem = "type" | "size" | "count";

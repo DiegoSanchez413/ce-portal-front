@@ -16,7 +16,7 @@ export function PortalHeader(props: Props) {
 
   return (
     <div className="relative z-20 px-4 pt-4">
-      <header className="flex min-h-[72px] items-center gap-3 rounded-2xl border-b-[3px] border-brand bg-card px-4 shadow-[0_2px_12px_rgba(31,42,68,.08)]">
+      <header className="flex min-h-[72px] items-center gap-3 rounded-2xl border-b-[3px] border-brand bg-card px-4 shadow-header">
         <div className="hidden min-w-0 flex-1 lg:flex">
           <a
             href="tel:+18555170390"

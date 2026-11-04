@@ -2,13 +2,17 @@
 
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
-import { useId, useRef, useState } from "react";
+import { Suspense, useId, useRef, useState } from "react";
+import { InlineMessage } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Input, Label } from "@/components/ui/field";
 import { api } from "@/lib/api/client";
 import type { CodeChallenge } from "@/lib/api/types";
 import { formatTime } from "./countdown";
-import { isValidIdentifier } from "./identifier";
+import { formatIdentifierInput, isValidIdentifier } from "./identifier";
+import { SessionEndedNotice } from "./session-ended-notice";
 import { getTurnstileToken } from "./turnstile";
-import { AuthCard, AuthTitle, CustomerCareLink, FieldError, primaryButton, textLink } from "./ui";
+import { AuthCard, AuthTitle, CustomerCareLink } from "./ui";
 
 type Props = {
   onCodeSent: (challenge: CodeChallenge) => void;
@@ -42,7 +46,7 @@ export function IdentifyStep({ onCodeSent }: Props) {
 
       if (data) return onCodeSent(data);
       if (response.status === 423 && apiError?.until) {
-        setError(`${tCode("locked")} ${tCode("tryAgainAt", { time: formatTime(apiError.until, locale) })}`);
+        setError(`${tCode("lockedTitle")} ${tCode("tryAgainAt", { time: formatTime(apiError.until, locale) })}`);
         return;
       }
       if (response.status === 429) return setError(t("tooMany"));
@@ -60,39 +64,40 @@ export function IdentifyStep({ onCodeSent }: Props) {
         <Image src="/creditexperts-logo.png" alt="" width={64} height={64} className="size-16 rounded-full" />
         <AuthTitle title={t("title")}>{t("subtitle")}</AuthTitle>
       </div>
+      <Suspense fallback={null}>
+        <SessionEndedNotice />
+      </Suspense>
       <form onSubmit={submit} noValidate className="flex flex-col gap-[22px]">
         <div className="flex flex-col gap-1.5">
-          <label htmlFor={inputId} className="text-sm font-bold text-navy">
-            {t("fieldLabel")}
-          </label>
-          <input
+          <Label htmlFor={inputId}>{t("fieldLabel")}</Label>
+          <Input
             id={inputId}
             value={value}
             onChange={(e) => {
-              setValue(e.target.value);
+              setValue(formatIdentifierInput(e.target.value));
               if (error) setError(null);
             }}
             placeholder={t("placeholder")}
             inputMode="tel"
             autoComplete="tel"
             aria-invalid={error !== null}
-            className="min-h-12 w-full rounded-[10px] border-[1.5px] border-line-strong px-4 py-3.5 text-base font-semibold text-navy outline-none focus:border-brand focus:shadow-[0_0_0_3px_#fed7aa] aria-invalid:border-danger"
+            className="h-[52px] px-4 text-base"
           />
-          {error && <FieldError>{error}</FieldError>}
+          {error && <InlineMessage>{error}</InlineMessage>}
           <p className="text-[13px] text-ink-muted">{t("helper")}</p>
         </div>
         <div ref={turnstileRef} />
-        <button type="submit" disabled={sending} className={primaryButton}>
+        <Button type="submit" block disabled={sending}>
           {t("continue")}
-        </button>
+        </Button>
       </form>
       <div className="flex flex-col items-center gap-1.5 border-t border-line-soft pt-3 text-center text-[13px] text-ink-muted">
         <span>
           {t("footerHelp")} <CustomerCareLink />
         </span>
-        <a href="https://creditexperts.us" className={textLink}>
-          {t("backToSite")}
-        </a>
+        <Button asChild variant="link" size="inline" className="font-bold">
+          <a href="https://creditexperts.us">{t("backToSite")}</a>
+        </Button>
       </div>
     </AuthCard>
   );

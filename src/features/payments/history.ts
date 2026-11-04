@@ -1,14 +1,15 @@
+import type { BadgeTone } from "@/components/ui/badge";
 import { formatMoney } from "@/lib/format";
 import type { PaymentItem } from "@/lib/api/types";
 
 export type PaymentStatus = PaymentItem["status"];
 
-export const STATUS_STYLES: Record<PaymentStatus, { fg: string; bg: string }> = {
-  approved: { fg: "#15803D", bg: "#DCFCE7" },
-  declined: { fg: "#B91C1C", bg: "#FEE2E2" },
-  refunded: { fg: "#4B5563", bg: "#EEF0F3" },
-  voided: { fg: "#4B5563", bg: "#EEF0F3" },
-  other: { fg: "#4B5563", bg: "#EEF0F3" },
+export const STATUS_TONES: Record<PaymentStatus, BadgeTone> = {
+  approved: "success",
+  declined: "danger",
+  refunded: "neutral",
+  voided: "neutral",
+  other: "neutral",
 };
 
 // Concepto visible: los tipos conocidos se traducen; cargos y otros muestran el detalle original.

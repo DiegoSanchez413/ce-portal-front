@@ -7,16 +7,27 @@ import { useState } from "react";
 import { BUREAU_COLORS, BUREAUS } from "@/features/credit/score";
 import { checkFiles, MAX_LETTER_FILES } from "@/features/files/documents";
 import { FilePicker } from "@/features/files/file-picker";
-import { Card, CardLabel, Chip, ErrorNote, outlineButton, primaryButton, QueryState, textLink } from "@/features/portal/ui";
+import { InlineMessage } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardLabel } from "@/components/ui/card";
+import { IconTile, ToggleChip } from "@/components/ui/choice";
+import { DataTable } from "@/components/ui/data-table";
+import { QueryState } from "@/components/ui/feedback";
+import { Field, Textarea } from "@/components/ui/field";
 import { usePortalQuery } from "@/features/portal/use-portal-query";
 import { Link } from "@/i18n/navigation";
 import { api } from "@/lib/api/client";
 import type { Letter } from "@/lib/api/types";
 import { formatInstantDate } from "@/lib/format";
-import { cn } from "@/lib/utils";
-import { canSendLetter, LETTER_STATUS_COLORS, LETTER_TYPES, MAX_NOTE, type Bureau, type LetterType } from "./letters";
+import { colors } from "@/lib/theme/colors";
+import { canSendLetter, LETTER_STATUS_TONES, LETTER_TYPES, MAX_NOTE, type Bureau, type LetterType } from "./letters";
 
-const BUREAU_SOFT_BG: Record<Bureau, string> = { equifax: "#FEF2F2", experian: "#EFF6FF", transunion: "#ECFEFF" };
+const BUREAU_SOFT_BG: Record<Bureau, string> = {
+  equifax: colors["danger-tint"],
+  experian: colors["info-tint"],
+  transunion: colors["bureau-transunion-tint"],
+};
 
 // Upload Letters: formulario de envío y lista de cartas enviadas.
 export function LettersView() {
@@ -29,9 +40,9 @@ export function LettersView() {
         <h1 className="text-2xl font-extrabold lg:text-[28px]">{t("title")}</h1>
         <p className="text-sm text-ink-muted lg:text-[15px]">
           {t("filesHint")}{" "}
-          <Link href="/files" className={textLink}>
-            {t("goToFiles")}
-          </Link>
+          <Button asChild variant="link" size="inline" className="font-bold">
+            <Link href="/files">{t("goToFiles")}</Link>
+          </Button>
         </p>
       </div>
       <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-6">
@@ -91,16 +102,16 @@ function LetterForm() {
   if (sent) {
     return (
       <Card className="items-center gap-3 py-8 text-center lg:p-6">
-        <span className="flex size-16 items-center justify-center rounded-full bg-range-good-bg text-range-good">
+        <IconTile tone="success" shape="circle" className="size-16">
           <Check className="size-8" strokeWidth={2.5} aria-hidden />
-        </span>
+        </IconTile>
         <span role="status" className="text-xl font-extrabold">{t("sentTitle")}</span>
         <span className="text-sm text-ink-muted">
           <LetterTitle letter={sent} /> · {t("fileCount", { count: sent.files })}
         </span>
-        <button type="button" onClick={reset} className={cn(outlineButton, "mt-1.5 w-auto px-6 text-sm")}>
+        <Button variant="outline" onClick={reset} className="mt-1.5 px-6 text-sm">
           {t("another")}
-        </button>
+        </Button>
       </Card>
     );
   }
@@ -111,18 +122,9 @@ function LetterForm() {
         <legend className="mb-2.5 text-sm font-bold">{t("whatReceived")}</legend>
         <div className="flex flex-wrap gap-2.5">
           {LETTER_TYPES.map((key) => (
-            <button
-              key={key}
-              type="button"
-              aria-pressed={type === key}
-              onClick={() => setType(key)}
-              className={cn(
-                "min-h-[46px] rounded-full border-[1.5px] px-[18px] text-sm font-extrabold",
-                type === key ? "border-brand bg-brand-soft text-brand-strong" : "border-line-strong bg-card text-navy hover:border-brand",
-              )}
-            >
+            <ToggleChip key={key} pressed={type === key} onClick={() => setType(key)}>
               {t(`types.${key}`)}
-            </button>
+            </ToggleChip>
           ))}
         </div>
       </fieldset>
@@ -131,46 +133,35 @@ function LetterForm() {
           <legend className="mb-2 text-sm font-bold">{t("whichBureau")}</legend>
           <div className="grid grid-cols-3 gap-2">
             {BUREAUS.map((key) => (
-              <button
+              <ToggleChip
                 key={key}
-                type="button"
-                aria-pressed={bureau === key}
+                pressed={bureau === key}
                 onClick={() => setBureau(key)}
-                className="min-h-[46px] rounded-xl border-[1.5px] border-t-4 px-0.5 py-3 text-xs font-extrabold whitespace-nowrap"
+                className="justify-center rounded-xl border-t-4 px-0.5 py-3 text-xs whitespace-nowrap"
                 style={{
                   color: BUREAU_COLORS[key],
+                  borderColor: bureau === key ? BUREAU_COLORS[key] : colors.line,
                   borderTopColor: BUREAU_COLORS[key],
-                  borderColor: bureau === key ? BUREAU_COLORS[key] : "#E5E7EB",
-                  background: bureau === key ? BUREAU_SOFT_BG[key] : "#fff",
+                  background: bureau === key ? BUREAU_SOFT_BG[key] : colors.white,
                 }}
               >
                 {t(`bureaus.${key}`)}
-              </button>
+              </ToggleChip>
             ))}
           </div>
         </fieldset>
       )}
       <FilePicker files={files} onChange={setFiles} max={MAX_LETTER_FILES} />
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="letter-note" className="text-sm font-bold">
-          {t("note")}
-        </label>
-        <textarea
-          id="letter-note"
-          value={note}
-          maxLength={MAX_NOTE}
-          onChange={(e) => setNote(e.target.value)}
-          placeholder={t("notePlaceholder")}
-          className="min-h-[88px] w-full resize-y rounded-[10px] border-[1.5px] border-line-strong px-3.5 py-3 text-[15px] font-semibold text-navy outline-none focus:border-brand focus:shadow-[0_0_0_3px_#fed7aa]"
-        />
+      <Field label={t("note")} htmlFor="letter-note">
+        <Textarea id="letter-note" value={note} maxLength={MAX_NOTE} onChange={(e) => setNote(e.target.value)} placeholder={t("notePlaceholder")} className="min-h-[88px]" />
         <span className="self-end text-xs font-semibold text-ink-muted">
           {note.length} / {MAX_NOTE}
         </span>
-      </div>
-      {state === "error" && <ErrorNote>{t("sendError")}</ErrorNote>}
-      <button type="button" onClick={() => void send()} disabled={!valid || state === "busy"} className={primaryButton}>
+      </Field>
+      {state === "error" && <InlineMessage>{t("sendError")}</InlineMessage>}
+      <Button block onClick={() => void send()} disabled={!valid || state === "busy"}>
         {state === "busy" ? t("sending") : t("send")}
-      </button>
+      </Button>
     </Card>
   );
 }
@@ -196,10 +187,8 @@ function SentLetters({ letters }: { letters: Letter[] }) {
   return (
     <>
       <ul className="flex flex-col gap-3 lg:hidden">
-        {letters.map((letter) => {
-          const colors = LETTER_STATUS_COLORS[letter.status];
-          return (
-            <li key={letter.id} className="flex items-center justify-between gap-3 rounded-2xl bg-card px-[18px] py-4 shadow-[0_4px_20px_rgba(31,42,68,.06)]">
+        {letters.map((letter) => (
+            <li key={letter.id} className="flex items-center justify-between gap-3 rounded-2xl bg-card px-[18px] py-4 shadow-card">
               <div className="flex min-w-0 flex-col gap-0.5">
                 <span className="text-[15px] font-extrabold">
                   <LetterTitle letter={letter} />
@@ -208,40 +197,23 @@ function SentLetters({ letters }: { letters: Letter[] }) {
                   {formatInstantDate(letter.sent_at, locale)} · {t("fileCount", { count: letter.files })}
                 </span>
               </div>
-              <Chip fg={colors.fg} bg={colors.bg}>{t(`status.${letter.status}`)}</Chip>
+              <Badge tone={LETTER_STATUS_TONES[letter.status]}>{t(`status.${letter.status}`)}</Badge>
             </li>
-          );
-        })}
+        ))}
       </ul>
-      <div className="hidden rounded-2xl bg-card px-6 py-2 shadow-[0_4px_20px_rgba(31,42,68,.06)] lg:block">
-        <table className="w-full text-left">
-          <thead>
-            <tr className="border-b border-line text-[11px] font-extrabold tracking-[.06em] text-[#9ca3af] uppercase">
-              <th className="py-3.5 font-extrabold">{t("columns.date")}</th>
-              <th className="py-3.5 font-extrabold">{t("columns.letter")}</th>
-              <th className="py-3.5 font-extrabold">{t("columns.files")}</th>
-              <th className="py-3.5 font-extrabold">{t("columns.status")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {letters.map((letter) => {
-              const colors = LETTER_STATUS_COLORS[letter.status];
-              return (
-                <tr key={letter.id} className="border-b border-line text-[15px] last:border-0">
-                  <td className="py-3.5 pr-3 font-extrabold whitespace-nowrap">{formatInstantDate(letter.sent_at, locale)}</td>
-                  <td className="py-3.5 pr-3 font-semibold text-[#4b5563]">
-                    <LetterTitle letter={letter} />
-                  </td>
-                  <td className="py-3.5 pr-3 font-semibold whitespace-nowrap text-[#4b5563]">{t("fileCount", { count: letter.files })}</td>
-                  <td className="py-3.5">
-                    <Chip fg={colors.fg} bg={colors.bg}>{t(`status.${letter.status}`)}</Chip>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+      <DataTable
+        className="hidden lg:flex"
+        template="max-content minmax(0,1fr) max-content max-content"
+        rowClassName="py-3.5"
+        rows={letters}
+        rowKey={(letter) => letter.id}
+        columns={[
+          { key: "date", header: t("columns.date"), cell: (letter) => <span className="pr-3 font-extrabold whitespace-nowrap">{formatInstantDate(letter.sent_at, locale)}</span> },
+          { key: "letter", header: t("columns.letter"), className: "font-semibold text-body", cell: (letter) => <LetterTitle letter={letter} /> },
+          { key: "files", header: t("columns.files"), className: "font-semibold whitespace-nowrap text-body", cell: (letter) => t("fileCount", { count: letter.files }) },
+          { key: "status", header: t("columns.status"), cell: (letter) => <Badge tone={LETTER_STATUS_TONES[letter.status]}>{t(`status.${letter.status}`)}</Badge> },
+        ]}
+      />
     </>
   );
 }

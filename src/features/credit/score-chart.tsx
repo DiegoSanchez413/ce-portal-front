@@ -1,12 +1,13 @@
 import { useLocale, useTranslations } from "next-intl";
 import type { CreditReport } from "@/lib/api/types";
 import { parseDate } from "@/lib/format";
+import { colors } from "@/lib/theme/colors";
 import { BUREAU_COLORS, BUREAUS, SCORE_MAX, SCORE_MIN } from "./score";
 
 const BANDS = [
-  { key: "poor", lo: SCORE_MIN, hi: 579, fill: "rgba(220,38,38,.07)", fg: "#B91C1C" },
-  { key: "fair", lo: 580, hi: 669, fill: "rgba(217,119,6,.08)", fg: "#B45309" },
-  { key: "good", lo: 670, hi: SCORE_MAX, fill: "rgba(34,197,94,.08)", fg: "#15803D" },
+  { key: "poor", lo: SCORE_MIN, hi: 579, fill: colors.danger, opacity: 0.07, fg: colors["danger-strong"] },
+  { key: "fair", lo: 580, hi: 669, fill: colors["warning-accent"], opacity: 0.08, fg: colors.warning },
+  { key: "good", lo: 670, hi: SCORE_MAX, fill: colors["success-accent"], opacity: 0.08, fg: colors.success },
 ] as const;
 const TICKS = [300, 580, 670, 850];
 const MAX_LABELS = 6;
@@ -34,7 +35,7 @@ export function ScoreChart({ reports }: { reports: CreditReport[] }) {
       <div className="relative h-[220px] pr-11 pl-[34px] lg:h-[240px] lg:pr-16 lg:pl-9">
         <div className="absolute inset-y-0 left-0 w-7 lg:w-[30px]">
           {TICKS.map((tick) => (
-            <span key={tick} className="absolute right-0 -translate-y-1/2 text-[11px] leading-none font-bold text-[#9CA3AF] lg:text-xs" style={{ top: `${scoreTop(tick)}%` }}>
+            <span key={tick} className="absolute right-0 -translate-y-1/2 text-[11px] leading-none font-bold text-faint lg:text-xs" style={{ top: `${scoreTop(tick)}%` }}>
               {tick}
             </span>
           ))}
@@ -53,7 +54,7 @@ export function ScoreChart({ reports }: { reports: CreditReport[] }) {
         <div className="relative h-full">
           <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 size-full overflow-visible" aria-hidden>
             {BANDS.map((band) => (
-              <rect key={band.key} x="0" width="100" y={scoreTop(band.hi)} height={scoreTop(band.lo) - scoreTop(band.hi)} fill={band.fill} />
+              <rect key={band.key} x="0" width="100" y={scoreTop(band.hi)} height={scoreTop(band.lo) - scoreTop(band.hi)} fill={band.fill} fillOpacity={band.opacity} />
             ))}
             {BUREAUS.map((bureau) => {
               const line = points

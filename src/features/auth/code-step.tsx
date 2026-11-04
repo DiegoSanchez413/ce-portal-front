@@ -3,11 +3,14 @@
 import { Lock } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Alert, InlineMessage } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/field";
 import { api } from "@/lib/api/client";
 import type { CodeChallenge, LoginError, SignInResult } from "@/lib/api/types";
 import { cn } from "@/lib/utils";
 import { formatCountdown, formatTime, useSecondsUntil } from "./countdown";
-import { AuthCard, AuthTitle, Banner, CustomerCareLink, FieldError, primaryButton } from "./ui";
+import { AuthCard, AuthTitle, CustomerCareLink } from "./ui";
 
 const LENGTH = 6;
 
@@ -25,7 +28,7 @@ export function CodeStep({ challenge, onChallenge, onResult, onRestart }: Props)
   const t = useTranslations("Code");
   const locale = useLocale();
   const [digits, setDigits] = useState<string[]>(() => Array(LENGTH).fill(""));
-  const [keepSignedIn, setKeepSignedIn] = useState(true);
+  const [keepSignedIn, setKeepSignedIn] = useState(false);
   const [error, setError] = useState<CodeError | null>(null);
   const [lockedUntil, setLockedUntil] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -45,7 +48,11 @@ export function CodeStep({ challenge, onChallenge, onResult, onRestart }: Props)
         setError(null);
         return;
       }
-      if (body?.code === "incorrect_code") return setError({ kind: "incorrect", attemptsLeft: body.attempts_left ?? 0 });
+      if (body?.code === "incorrect_code") {
+        setDigits(Array(LENGTH).fill(""));
+        inputs.current[0]?.focus();
+        return setError({ kind: "incorrect", attemptsLeft: body.attempts_left ?? 0 });
+      }
       if (body?.code === "expired_code") return setError({ kind: "expired" });
       setError({ kind: "generic" });
     },
@@ -153,9 +160,9 @@ export function CodeStep({ challenge, onChallenge, onResult, onRestart }: Props)
       </AuthTitle>
 
       {locked && (
-        <Banner tone="danger" icon={<Lock className="mt-px size-[18px] shrink-0 text-danger" strokeWidth={2.25} aria-hidden />}>
-          {t("locked")}
-        </Banner>
+        <Alert tone="danger" icon={<Lock className="mt-px size-[18px] shrink-0 text-danger" strokeWidth={2.25} aria-hidden />}>
+          {t("lockedTitle")} {t("tryAgainAt", { time: formatTime(lockedUntil, locale) })}
+        </Alert>
       )}
 
       <form
@@ -187,37 +194,25 @@ export function CodeStep({ challenge, onChallenge, onResult, onRestart }: Props)
                 aria-invalid={error?.kind === "incorrect"}
                 className={cn(
                   "h-14 w-full min-w-0 flex-1 rounded-xl border-[1.5px] border-line-strong bg-card text-center text-2xl font-extrabold text-navy outline-none",
-                  "focus:border-brand focus:shadow-[0_0_0_3px_#fed7aa] aria-invalid:border-danger",
-                  "disabled:bg-[#f3f4f6] disabled:opacity-60",
+                  "focus:border-brand focus:shadow-[0_0_0_3px_var(--color-brand-focus)] aria-invalid:border-danger",
+                  "disabled:bg-muted disabled:opacity-60",
                 )}
               />
             ))}
           </div>
-          {errorText && <FieldError>{errorText}</FieldError>}
+          {errorText && <InlineMessage>{errorText}</InlineMessage>}
         </div>
 
-        <label className="flex min-h-11 cursor-pointer items-center gap-2.5 text-sm font-semibold text-navy">
-          <input
-            type="checkbox"
-            checked={keepSignedIn}
-            onChange={(e) => setKeepSignedIn(e.target.checked)}
-            className="size-[22px] accent-brand"
-          />
-          {t("keepSignedIn")}
-        </label>
+        <Checkbox label={t("keepSignedIn")} checked={keepSignedIn} onChange={(e) => setKeepSignedIn(e.target.checked)} />
 
-        <button type="submit" disabled={locked || busy || digits.some((d) => !d)} className={primaryButton}>
+        <Button type="submit" block disabled={locked || busy || digits.some((d) => !d)}>
           {t("verify")}
-        </button>
+        </Button>
       </form>
 
       <div className="flex flex-col items-center gap-1 text-center text-sm">
-        {locked ? (
-          <p className="flex min-h-11 items-center font-bold text-[#9ca3af]">
-            {t("tryAgainAt", { time: formatTime(lockedUntil, locale) })}
-          </p>
-        ) : resendIn > 0 ? (
-          <p className="flex min-h-11 items-center font-bold text-[#9ca3af]">
+        {locked ? null : resendIn > 0 ? (
+          <p className="flex min-h-11 items-center font-bold text-faint">
             {t("resendIn", { time: formatCountdown(resendIn) })}
           </p>
         ) : (
@@ -235,11 +230,19 @@ export function CodeStep({ challenge, onChallenge, onResult, onRestart }: Props)
             type="button"
             disabled={locked || busy}
             onClick={() => void send(challenge.channel === "sms" ? "email" : "sms")}
-            className="min-h-11 font-bold text-brand hover:underline disabled:text-[#9ca3af] disabled:no-underline"
+            className="min-h-11 font-bold text-brand hover:underline disabled:text-faint disabled:no-underline"
           >
             {challenge.channel === "sms" ? t("sendEmail") : t("sendPhone")}
           </button>
         )}
+        <button
+          type="button"
+          disabled={busy}
+          onClick={onRestart}
+          className="min-h-11 font-bold text-brand hover:underline disabled:text-faint disabled:no-underline"
+        >
+          {t("useDifferent")}
+        </button>
         <span className="pt-1.5 text-[13px] text-ink-muted">
           {t("changedNumber")} <CustomerCareLink />
         </span>

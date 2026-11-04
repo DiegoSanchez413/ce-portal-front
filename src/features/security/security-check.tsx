@@ -4,8 +4,9 @@ import { Lock } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { formatCountdown, formatTime, useSecondsUntil } from "@/features/auth/countdown";
-import { Banner, FieldError } from "@/features/auth/ui";
-import { ghostButton, primaryButton, Sheet } from "@/features/portal/ui";
+import { Alert, InlineMessage } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Sheet } from "@/components/ui/modal";
 import { api } from "@/lib/api/client";
 import { cn } from "@/lib/utils";
 
@@ -118,9 +119,9 @@ export function SecurityCheck({ open, onVerified, onCancel }: { open: boolean; o
   return (
     <Sheet open={open} onOpenChange={(next) => !next && onCancel()} title={t("title")} description={t("text", { destination: challenge?.destination ?? "***-***-****" })}>
       {locked && (
-        <Banner tone="danger" icon={<Lock className="mt-px size-[18px] shrink-0 text-danger" strokeWidth={2.25} aria-hidden />}>
+        <Alert tone="danger" icon={<Lock className="mt-px size-[18px] shrink-0 text-danger" strokeWidth={2.25} aria-hidden />}>
           {t("locked")}
-        </Banner>
+        </Alert>
       )}
       <form
         noValidate
@@ -152,21 +153,21 @@ export function SecurityCheck({ open, onVerified, onCancel }: { open: boolean; o
                 aria-invalid={error !== null}
                 className={cn(
                   "h-14 w-full min-w-0 flex-1 rounded-xl border-[1.5px] border-line-strong bg-card text-center text-2xl font-extrabold text-navy outline-none",
-                  "focus:border-brand focus:shadow-[0_0_0_3px_#fed7aa] aria-invalid:border-danger disabled:bg-[#f3f4f6] disabled:opacity-60",
+                  "focus:border-brand focus:shadow-[0_0_0_3px_var(--color-brand-focus)] aria-invalid:border-danger disabled:bg-muted disabled:opacity-60",
                 )}
               />
             ))}
           </div>
-          {error && <FieldError>{error}</FieldError>}
+          {error && <InlineMessage>{error}</InlineMessage>}
         </div>
-        <button type="submit" disabled={locked || busy || !challenge || digits.some((d) => !d)} className={primaryButton}>
+        <Button type="submit" block disabled={locked || busy || !challenge || digits.some((d) => !d)}>
           {t("verify")}
-        </button>
+        </Button>
         <div className="flex flex-col items-center gap-1 text-center text-sm">
           {locked && lockedUntil ? (
-            <p className="flex min-h-11 items-center font-bold text-[#9ca3af]">{t("tryAgainAt", { time: formatTime(lockedUntil, locale) })}</p>
+            <p className="flex min-h-11 items-center font-bold text-faint">{t("tryAgainAt", { time: formatTime(lockedUntil, locale) })}</p>
           ) : resendIn > 0 ? (
-            <p className="flex min-h-11 items-center font-bold text-[#9ca3af]">{t("resendIn", { time: formatCountdown(resendIn) })}</p>
+            <p className="flex min-h-11 items-center font-bold text-faint">{t("resendIn", { time: formatCountdown(resendIn) })}</p>
           ) : (
             challenge && (
               <button type="button" disabled={busy} onClick={() => void send()} className="min-h-11 rounded-full px-4 font-bold text-brand hover:bg-brand-soft">
@@ -174,9 +175,9 @@ export function SecurityCheck({ open, onVerified, onCancel }: { open: boolean; o
               </button>
             )
           )}
-          <button type="button" onClick={onCancel} className={ghostButton}>
+          <Button variant="ghost" size="sm" onClick={onCancel} className="px-3 text-[15px]">
             {t("cancel")}
-          </button>
+          </Button>
         </div>
       </form>
     </Sheet>

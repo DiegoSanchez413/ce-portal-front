@@ -22,7 +22,7 @@ export default function ErrorPage({
   return (
     <div className="flex flex-col items-start gap-4 p-6">
       <h2 className="text-xl font-extrabold">{t("title")}</h2>
-      <Button onClick={retry}>{t("retry")}</Button>
+      <Button size="sm" onClick={retry}>{t("retry")}</Button>
     </div>
   );
 }

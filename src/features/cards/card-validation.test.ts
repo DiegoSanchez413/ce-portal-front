@@ -31,6 +31,16 @@ describe("card validation", () => {
     expect(expiryInFuture("13/27", today)).toBe(false);
   });
 
+  it("acepta un CVC de 3 o 4 dígitos sin importar la marca, como el Soft y la mini-app", () => {
+    const today = new Date(2026, 9, 20);
+    const base = { cardholdername: "Luis A", expiry: "04/30", zipcode: "90001", set_default: false };
+    for (const cardnumber of ["4111 1111 1111 1111", "3782 822463 10005"]) {
+      expect(validateDraft({ ...base, cardnumber, cvc: "123" }, today).cvc).toBeUndefined();
+      expect(validateDraft({ ...base, cardnumber, cvc: "1234" }, today).cvc).toBeUndefined();
+      expect(validateDraft({ ...base, cardnumber, cvc: "12" }, today).cvc).toBe(true);
+    }
+  });
+
   it("marca los campos inválidos y arma la tarjeta para el back", () => {
     const today = new Date(2026, 9, 20);
     expect(validateDraft({ ...emptyDraft(false), cardnumber: "4111", zipcode: "123" }, today)).toEqual({

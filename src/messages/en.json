@@ -40,7 +40,9 @@
     "footerHelp": "Need help? Call Customer Care",
     "backToSite": "Back to creditexperts.us",
     "tooMany": "Too many attempts. Please try again later.",
-    "genericError": "Something went wrong. Please try again."
+    "genericError": "Something went wrong. Please try again.",
+    "sessionExpired": "Your session ended. Please sign in again.",
+    "portalDisabled": "Portal access for your account is turned off. Please call Customer Care."
   },
   "Error": {
     "title": "Something went wrong",
@@ -63,13 +65,18 @@
     "incorrect": "Incorrect code. {count, plural, one {# attempt} other {# attempts}} left.",
     "expired": "This code has expired. Please request a new one.",
     "tooMany": "Too many attempts. Please try again later.",
-    "genericError": "Something went wrong. Please try again."
+    "genericError": "Something went wrong. Please try again.",
+    "lockedTitle": "Too many attempts.",
+    "useDifferent": "Use a different number"
   },
   "SelectClient": {
     "title": "Which account would you like to access?",
     "subtitle": "This phone number is linked to more than one account.",
     "notYou": "Not you?",
-    "useDifferent": "Use a different number"
+    "useDifferent": "Use a different number",
+    "accountEnding": "Account ending in {digits}",
+    "current": "Current",
+    "back": "Back to my portal"
   },
   "NoAccess": {
     "title": "Your account doesn't have portal access right now",
@@ -181,7 +188,8 @@
       "voided": "Voided",
       "other": "Processed"
     },
-    "payNow": "Pay now"
+    "payNow": "Pay now",
+    "receipt": "Receipt"
   },
   "Receipt": {
     "title": "Payment receipt",
@@ -214,24 +222,46 @@
     "agent": "Agent",
     "requestChange": "Request a change",
     "whatToChange": "What do you want to change?",
+    "chooseMany": "Choose one or more.",
     "fields": {
       "mobile": "Mobile number",
       "email": "Email",
-      "address": "Address",
-      "other": "Other"
+      "address": "Address"
     },
-    "details": "Details",
-    "detailsPlaceholder": "Tell us the new information",
     "send": "Send request",
     "cancel": "Cancel",
     "sentTitle": "We received your request.",
     "sentSub": "Your agent will contact you.",
     "done": "Done",
-    "error": "We couldn't send your request. Please try again."
+    "error": "We couldn't send your request. Please try again.",
+    "newValue": {
+      "mobile": "New mobile number",
+      "email": "New email",
+      "address": "New address"
+    },
+    "placeholder": {
+      "mobile": "(555) 555-5555",
+      "email": "name@example.com"
+    },
+    "invalid": {
+      "mobile": "Enter a 10-digit mobile number.",
+      "email": "Enter a valid email."
+    },
+    "current": "Current: {value}",
+    "addressForm": {
+      "street": "Street address",
+      "streetPlaceholder": "Start typing and choose your address",
+      "unit": "Apt / Suite",
+      "optional": "Optional",
+      "city": "City",
+      "state": "State",
+      "zip": "ZIP",
+      "incomplete": "Complete the street, city, state (2 letters) and 5-digit ZIP."
+    }
   },
   "Access": {
     "title": "My access",
-    "subtitle": "Where your account was used recently.",
+    "subtitle": "Devices that signed in to your account. Tap one to see its sign-ins.",
     "thisDevice": "This device",
     "today": "Today, {time}",
     "signOutOthers": "Sign out of other devices",
@@ -239,7 +269,27 @@
     "confirmSub": "You'll stay signed in here. Other devices will need a new code to sign in.",
     "cancel": "Cancel",
     "signedOut": "Signed out of other devices",
-    "error": "We couldn't sign out the other devices. Please try again."
+    "error": "We couldn't sign out the other devices. Please try again.",
+    "activeNow": "Active now",
+    "active": "Signed in",
+    "signIns": "{count, plural, one {# sign-in} other {# sign-ins}}",
+    "showingLast": "Showing the last {count}.",
+    "signOutDevice": "Sign out this device",
+    "confirmDeviceTitle": "Sign out of {device}?",
+    "confirmDeviceSub": "That device will need a new code to sign in again.",
+    "deviceSignedOut": "Device signed out",
+    "status": {
+      "current": "This session",
+      "active": "Signed in",
+      "logout": "Signed out",
+      "inactivity": "Ended for inactivity",
+      "expired": "Expired",
+      "status_change": "Ended",
+      "phone_change": "Ended (phone changed)",
+      "portal_disabled": "Ended (access turned off)",
+      "signed_out_by_client": "Signed out by you",
+      "ended": "Ended"
+    }
   },
   "Pay": {
     "title": "Make a payment",
@@ -258,13 +308,14 @@
     "approved": "Payment approved",
     "approvedMeta": "{date} · {time}",
     "downloadReceipt": "Download receipt",
-    "backHome": "Back to home",
     "declined": "Your payment was declined. Please try another card or call us at (855) 517-0390.",
     "tryAnother": "Try another card",
     "nothingDue": "There is nothing to pay right now.",
     "inProgress": "Your payment is being processed. Please wait a moment before trying again.",
     "error": "We couldn't process your payment. Please try again.",
-    "back": "Back to payments"
+    "done": "Done",
+    "close": "Close",
+    "cancel": "Cancel"
   },
   "Cards": {
     "title": "My cards",
@@ -282,12 +333,10 @@
     "cancel": "Cancel",
     "changed": "Payment card updated",
     "changeError": "We couldn't change your payment card. Please try again.",
-    "addTitle": "Add a card",
-    "addSubtitle": "Cards are saved securely. We never see your full number.",
+    "addTitle": "New card",
     "scan": "Scan card",
     "scanning": "Reading your card…",
     "scanHint": "Take a photo of your card and we'll fill in the details. You'll type the CVC.",
-    "orManual": "or enter manually",
     "scanned": "Card details read. Check they're correct and enter the CVC.",
     "scanFailed": "We couldn't read your card. Please enter the details manually.",
     "cameraTitle": "Scan card",
@@ -316,7 +365,20 @@
       "expiry": "Enter a valid expiration date.",
       "cvc": "Enter the CVC.",
       "zipcode": "Enter a 5-digit ZIP code."
-    }
+    },
+    "previewBrand": "CARD",
+    "previewHolder": "Card holder",
+    "previewName": "Full name",
+    "previewExp": "EXP",
+    "info": "Card information",
+    "numberBlock": "Card number, block {n} of 4",
+    "mm": "MM",
+    "yy": "YY",
+    "example": "e.g. {value}",
+    "expiredTitle": "Expired card",
+    "expiredText": "It expired in {month}/{year}. Enter a valid date.",
+    "invalidMonth": "The month must be between 01 and 12",
+    "missing": "Still needed: {fields}"
   },
   "Security": {
     "title": "Quick security check",
@@ -422,5 +484,10 @@
       "files": "Files",
       "status": "Status"
     }
+  },
+  "NotFound": {
+    "title": "We couldn't find this page",
+    "subtitle": "The link may be wrong or the page may have moved.",
+    "home": "Go to my portal"
   }
 }

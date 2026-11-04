@@ -1,0 +1,72 @@
+// Paleta global del portal (mockups aprobados). En clases se usan los tokens de Tailwind con el mismo nombre
+// (bg-brand, text-body, border-danger-line…); aquí quedan para el código que necesita el valor: gráficos, PDF, SVG.
+export const colors = {
+  brand: "#f26a21",
+  "brand-hover": "#db5a15",
+  "brand-strong": "#c2410c",
+  "brand-soft": "#fef0e7",
+  "brand-focus": "#fed7aa",
+  "brand-tint": "#fffbf8",
+  "brand-wash": "#fff7ed",
+
+  navy: "#1f2a44",
+  "navy-light": "#2f3f66",
+  body: "#4b5563",
+  "ink-muted": "#6b7280",
+  faint: "#9ca3af",
+
+  line: "#e5e7eb",
+  "line-strong": "#d1d5db",
+  "line-soft": "#eef0f3",
+  "line-cool": "#dce3ec",
+  surface: "#f5f6f8",
+  "surface-alt": "#f7f8fa",
+  white: "#ffffff",
+  "wave-1": "#efe5dd",
+  "wave-2": "#f2d8cd",
+
+  success: "#15803d",
+  "success-strong": "#166534",
+  "success-soft": "#dcfce7",
+  "success-tint": "#f0fdf4",
+  "success-line": "#bbf7d0",
+  "success-accent": "#22c55e",
+
+  danger: "#dc2626",
+  "danger-strong": "#b91c1c",
+  "danger-text": "#991b1b",
+  "danger-soft": "#fee2e2",
+  "danger-tint": "#fef2f2",
+  "danger-line": "#fecaca",
+  "danger-light": "#fca5a5",
+
+  warning: "#b45309",
+  "warning-strong": "#92400e",
+  "warning-accent": "#d97706",
+  "warning-soft": "#fef3c7",
+  "warning-tint": "#fffbeb",
+  "warning-line": "#fde68a",
+
+  info: "#1d4ed8",
+  "info-strong": "#1e3a8a",
+  "info-soft": "#dbeafe",
+  "info-tint": "#eff6ff",
+  "info-line": "#bfdbfe",
+
+  whatsapp: "#22c55e",
+  "bureau-equifax": "#b91c1c",
+  "bureau-experian": "#1d4ed8",
+  "bureau-transunion": "#0891b2",
+  "bureau-transunion-tint": "#ecfeff",
+  "card-visa": "#1a1f71",
+  "card-mc": "#eb001b",
+  "card-amex": "#2e77bc",
+  "card-discover": "#e55c20",
+  "card-chip": "#b8912f",
+  "card-chip-light": "#e8c877",
+  "card-chip-shine": "#f0daa0",
+  "card-chip-ink": "#5a4614",
+  "card-stripe": "#101828",
+} as const;
+
+export type ColorName = keyof typeof colors;

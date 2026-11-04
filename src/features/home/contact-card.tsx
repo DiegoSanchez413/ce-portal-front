@@ -1,6 +1,6 @@
 import { useTranslations } from "next-intl";
 import { HELP_LINKS } from "@/components/shell/help-links";
-import { Card, CardLabel } from "@/features/portal/ui";
+import { Card, CardLabel } from "@/components/ui/card";
 
 // Contact us de Inicio, solo en celular: en escritorio está en el menú lateral.
 export function ContactCard() {
@@ -20,7 +20,7 @@ export function ContactCard() {
             rel={key === "whatsapp" ? "noopener noreferrer" : undefined}
             className="flex min-h-11 flex-col items-center gap-1.5 rounded-[14px] bg-surface-alt px-1.5 py-3.5 text-navy hover:bg-brand-soft"
           >
-            <span className={`flex size-10 items-center justify-center rounded-full bg-card shadow-[0_1px_4px_rgba(31,42,68,.1)] ${color}`}>
+            <span className={`flex size-10 items-center justify-center rounded-full bg-card shadow-pill ${color}`}>
               <Icon className="size-[18px]" strokeWidth={2.25} aria-hidden />
             </span>
             <span className="text-[13px] font-extrabold">{help(key)}</span>

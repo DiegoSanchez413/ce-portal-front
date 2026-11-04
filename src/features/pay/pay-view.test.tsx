@@ -4,7 +4,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { PayNow } from "@/lib/api/types";
 import en from "@/messages/en.json";
-import { PayView } from "./pay-view";
+import { PayDialog } from "./pay-view";
 
 const api = vi.hoisted(() => ({ GET: vi.fn(), POST: vi.fn() }));
 vi.mock("@/lib/api/client", () => ({ api }));
@@ -33,7 +33,7 @@ function renderPay() {
   return render(
     <QueryClientProvider client={new QueryClient()}>
       <NextIntlClientProvider locale="en" messages={en} timeZone="America/Los_Angeles">
-        <PayView />
+        <PayDialog open onClose={() => {}} />
       </NextIntlClientProvider>
     </QueryClientProvider>,
   );

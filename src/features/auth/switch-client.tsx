@@ -59,6 +59,7 @@ export function SwitchClient() {
       busy={busy}
       onSelect={(leadId) => void select(leadId)}
       onUseDifferentNumber={useDifferentNumber}
+      onBack={() => router.replace("/")}
     />
   );
 }

@@ -3,9 +3,12 @@
 import { CircleCheck, Download } from "lucide-react";
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
-import { Dialog } from "radix-ui";
 import { useState } from "react";
-import { ErrorNote, ghostButton, primaryButton, Sheet } from "@/features/portal/ui";
+import { InlineMessage } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { CardLabel } from "@/components/ui/card";
+import { DialogClose, Sheet } from "@/components/ui/modal";
 import type { Receipt } from "@/lib/api/types";
 import { formatDate, formatMoney } from "@/lib/format";
 import { paymentConcept, planPaymentLine } from "./history";
@@ -61,16 +64,16 @@ export function ReceiptDialog({ receipt, onClose }: { receipt: Receipt | null; o
       <div className="flex items-center gap-3">
         <Image src="/creditexperts-logo.png" alt="" width={44} height={44} className="size-11 shrink-0 rounded-full" />
         <div className="flex flex-col">
-          <span className="text-xs font-extrabold tracking-[.06em] text-ink-muted uppercase">{t("title")}</span>
+          <CardLabel>{t("title")}</CardLabel>
           <span className="text-[15px] font-extrabold">Credit Experts</span>
         </div>
       </div>
       <div className="flex flex-col items-center gap-1.5 rounded-[14px] bg-surface-alt p-[18px]">
         <span className="text-4xl leading-none font-extrabold">{formatMoney(receipt.amount)}</span>
-        <span className="flex items-center gap-1.5 rounded-full bg-range-good-bg px-3 py-1 text-xs font-extrabold text-range-good">
+        <Badge tone="success" className="gap-1.5 px-3">
           <CircleCheck className="size-3.5" strokeWidth={2.75} aria-hidden />
           {t("approved")}
-        </span>
+        </Badge>
       </div>
       <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2.5 text-sm">
         {rows.map((row) => (
@@ -80,13 +83,17 @@ export function ReceiptDialog({ receipt, onClose }: { receipt: Receipt | null; o
           </div>
         ))}
       </dl>
-      {failed && <ErrorNote>{t("pdfError")}</ErrorNote>}
+      {failed && <InlineMessage>{t("pdfError")}</InlineMessage>}
       <div className="flex flex-col gap-2.5">
-        <button type="button" onClick={() => void download()} className={primaryButton}>
+        <Button block onClick={() => void download()}>
           <Download className="size-[18px]" strokeWidth={2.5} aria-hidden />
           {t("downloadPdf")}
-        </button>
-        <Dialog.Close className={ghostButton}>{t("close")}</Dialog.Close>
+        </Button>
+        <DialogClose asChild>
+          <Button variant="ghost" size="md" block>
+            {t("close")}
+          </Button>
+        </DialogClose>
       </div>
     </Sheet>
   );

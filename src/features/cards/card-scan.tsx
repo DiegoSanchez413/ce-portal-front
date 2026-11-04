@@ -3,9 +3,8 @@
 import { Camera, LoaderCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRef, useState } from "react";
-import { outlineButton } from "@/features/portal/ui";
+import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api/client";
-import { cn } from "@/lib/utils";
 import { CardCamera, liveCameraSupported } from "./card-camera";
 
 const MAX_SIDE = 1280;
@@ -35,7 +34,17 @@ function toJpeg(file: File): Promise<string> {
 }
 
 // Scan card: abre la cámara (o la del teléfono / una foto), manda la imagen y devuelve los datos leídos.
-export function CardScan({ onResult, onError, onManual }: { onResult: (card: ScannedCard) => void; onError: () => void; onManual: () => void }) {
+export function CardScan({
+  onStart,
+  onResult,
+  onError,
+  onManual,
+}: {
+  onStart?: () => void;
+  onResult: (card: ScannedCard) => void;
+  onError: () => void;
+  onManual: () => void;
+}) {
   const t = useTranslations("Cards");
   const native = useRef<HTMLInputElement>(null);
   const gallery = useRef<HTMLInputElement>(null);
@@ -43,6 +52,7 @@ export function CardScan({ onResult, onError, onManual }: { onResult: (card: Sca
   const [scanning, setScanning] = useState(false);
 
   const submit = async (image: string) => {
+    onStart?.();
     setScanning(true);
     try {
       const { data } = await api.POST("/cards/scan", { body: { image } });
@@ -64,17 +74,12 @@ export function CardScan({ onResult, onError, onManual }: { onResult: (card: Sca
   };
 
   return (
-    <div className="flex flex-col gap-2">
-      <button
-        type="button"
-        disabled={scanning}
-        onClick={() => (liveCameraSupported() ? setCamera(true) : native.current?.click())}
-        className={cn(outlineButton, "min-h-12 text-[15px]")}
-      >
-        {scanning ? <LoaderCircle className="size-[18px] animate-spin" aria-hidden /> : <Camera className="size-[18px]" strokeWidth={2.25} aria-hidden />}
+    <div className="flex flex-wrap items-center gap-3">
+      <Button variant="outline" size="xs" disabled={scanning} onClick={() => (liveCameraSupported() ? setCamera(true) : native.current?.click())}>
+        {scanning ? <LoaderCircle className="size-[18px] animate-spin" aria-hidden /> : <Camera className="size-[18px]" aria-hidden />}
         {scanning ? t("scanning") : t("scan")}
-      </button>
-      <span className="text-center text-[13px] text-ink-muted">{t("scanHint")}</span>
+      </Button>
+      <span className="flex-[1_1_220px] text-xs text-ink-muted">{t("scanHint")}</span>
       <input ref={native} type="file" accept="image/*" capture="environment" hidden onChange={fromFile} />
       <input ref={gallery} type="file" accept="image/*" hidden onChange={fromFile} />
       {camera && (

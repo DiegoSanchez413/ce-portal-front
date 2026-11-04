@@ -34,11 +34,11 @@ function typeCode(code: string) {
 describe("pantalla del código", () => {
   beforeEach(() => post.mockReset());
 
-  it("muestra el destino, Keep me signed in marcada y el contador de reenvío", () => {
+  it("muestra el destino, Keep me signed in desmarcada y el contador de reenvío", () => {
     renderStep();
 
     expect(screen.getByText("***-***-7392")).toBeInTheDocument();
-    expect(screen.getByLabelText("Keep me signed in on this device")).toBeChecked();
+    expect(screen.getByLabelText("Keep me signed in on this device")).not.toBeChecked();
     expect(screen.getByText(/^Resend code in 0:5\d$/)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Send code to my email" })).toBeInTheDocument();
   });
@@ -60,8 +60,11 @@ describe("pantalla del código", () => {
 
     expect(await screen.findByText("Incorrect code. 3 attempts left.")).toBeInTheDocument();
     expect(post).toHaveBeenCalledWith("/auth/verify", {
-      body: { challenge_id: challenge.challenge_id, code: "482913", keep_signed_in: true },
+      body: { challenge_id: challenge.challenge_id, code: "482913", keep_signed_in: false },
     });
+    expect(screen.getByLabelText("Digit 1")).toHaveValue("");
+    expect(screen.getByLabelText("Digit 6")).toHaveValue("");
+    expect(screen.getByLabelText("Digit 1")).toHaveFocus();
   });
 
   it("bloquea casillas y botones y dice a qué hora reintentar", async () => {
@@ -75,12 +78,24 @@ describe("pantalla del código", () => {
 
     typeCode("000000");
 
-    expect(await screen.findByText("Too many attempts. Please try again in 15 minutes.")).toBeInTheDocument();
     const time = new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit" }).format(until);
-    expect(screen.getByText(`You can try again at ${time}`)).toBeInTheDocument();
+    expect(await screen.findByText(`Too many attempts. You can try again at ${time}`)).toBeInTheDocument();
     expect(screen.getByLabelText("Digit 1")).toBeDisabled();
     expect(screen.getByRole("button", { name: "Verify" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Send code to my email" })).toBeDisabled();
+  });
+
+  it("vuelve a pedir el número con Use a different number", () => {
+    const onRestart = vi.fn();
+    render(
+      <NextIntlClientProvider locale="en" messages={en} timeZone="America/Los_Angeles">
+        <CodeStep challenge={challenge} onChallenge={vi.fn()} onResult={vi.fn()} onRestart={onRestart} />
+      </NextIntlClientProvider>,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Use a different number" }));
+
+    expect(onRestart).toHaveBeenCalledOnce();
   });
 
   it("traduce el error de intentos en español", async () => {

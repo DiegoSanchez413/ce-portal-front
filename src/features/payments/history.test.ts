@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { lateBreakdown, paymentConcept, planPaymentLine, receiptAvailable, STATUS_STYLES } from "./history";
+import { lateBreakdown, paymentConcept, planPaymentLine, receiptAvailable, STATUS_TONES } from "./history";
 
 const line = ({ plan, n, total }: { plan: string; n: number; total: number }) => `${plan} · payment ${n} of ${total}`;
 
@@ -33,10 +33,10 @@ describe("estados del historial", () => {
   });
 
   it("usa verde para aprobado, rojo para rechazado y gris para reembolsado o anulado", () => {
-    expect(STATUS_STYLES.approved.fg).toBe("#15803D");
-    expect(STATUS_STYLES.declined.fg).toBe("#B91C1C");
-    expect(STATUS_STYLES.refunded.bg).toBe("#EEF0F3");
-    expect(STATUS_STYLES.voided.bg).toBe("#EEF0F3");
+    expect(STATUS_TONES.approved).toBe("success");
+    expect(STATUS_TONES.declined).toBe("danger");
+    expect(STATUS_TONES.refunded).toBe("neutral");
+    expect(STATUS_TONES.voided).toBe("neutral");
   });
 });
 

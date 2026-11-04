@@ -39,15 +39,16 @@ export function UserMenu({ user }: { user: PortalUser | null }) {
             {user?.initials ?? ""}
           </span>
           {user && (
-            <span className="hidden text-[15px] font-bold text-navy lg:inline">
-              {user.name}
+            <span className="hidden flex-col items-start pr-1.5 leading-tight lg:flex">
+              <span className="text-[15px] font-bold text-navy">{user.name}</span>
+              <span className="text-xs font-semibold text-ink-muted">{user.account}</span>
             </span>
           )}
         </DropdownMenuTrigger>
         <DropdownMenuContent
           align="end"
           sideOffset={10}
-          className="w-66 rounded-[14px] border-line-soft p-2 shadow-[0_14px_40px_rgba(31,42,68,.18)]"
+          className="w-66 rounded-[14px] border-line-soft p-2 shadow-popover"
         >
           {user && (
             <>

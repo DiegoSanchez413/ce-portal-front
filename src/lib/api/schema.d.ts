@@ -21,17 +21,34 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/access/sessions": {
+    "/access/devices": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Last 20 sessions */
-        get: operations["listAccessSessions"];
+        /** Devices with their recent sessions */
+        get: operations["listAccessDevices"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/access/devices/{key}/sign-out": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** End the open sessions of one device */
+        post: operations["signOutDevice"];
         delete?: never;
         options?: never;
         head?: never;
@@ -617,6 +634,9 @@ export interface components {
             lead_id: number;
             /** @example Luis A. · Credit Experts */
             label: string;
+            /** @example 7386 */
+            account_hint: string | null;
+            current: boolean;
         };
         Reactivation: {
             token: string | null;
@@ -767,15 +787,29 @@ export interface components {
             specialist: string | null;
             agent: string | null;
         };
-        AccessSession: {
-            id: number;
+        AccessDevice: {
+            key: string;
             device: string;
             browser: string;
             is_phone: boolean;
             city: string | null;
             region: string | null;
             /** Format: date-time */
+            last_active_at: string;
+            active: boolean;
+            current: boolean;
+            total_sessions: number;
+            sessions: components["schemas"]["AccessSession"][];
+        };
+        AccessSession: {
+            id: number;
+            /** Format: date-time */
             started_at: string;
+            city: string | null;
+            region: string | null;
+            active: boolean;
+            /** @enum {string|null} */
+            end_reason: "logout" | "inactivity" | "expired" | "status_change" | "phone_change" | "portal_disabled" | "signed_out_by_client" | null;
             current: boolean;
         };
         Card: {
@@ -896,7 +930,7 @@ export interface operations {
             };
         };
     };
-    listAccessSessions: {
+    listAccessDevices: {
         parameters: {
             query?: never;
             header?: never;
@@ -905,14 +939,48 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Sessions */
+            /** @description Devices */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AccessSession"][];
+                    "application/json": components["schemas"]["AccessDevice"][];
                 };
+            };
+        };
+    };
+    signOutDevice: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Done */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unknown device */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description This device: use logout */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -1688,9 +1756,11 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": {
-                    /** @enum {string} */
-                    field: "mobile" | "email" | "address" | "other";
-                    details: string;
+                    changes: {
+                        /** @enum {string} */
+                        field: "mobile" | "email" | "address";
+                        value: string;
+                    }[];
                 };
             };
         };

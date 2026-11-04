@@ -40,7 +40,9 @@
     "footerHelp": "¿Necesita ayuda? Llame a Atención al Cliente",
     "backToSite": "Volver a creditexperts.us",
     "tooMany": "Demasiados intentos. Intente de nuevo más tarde.",
-    "genericError": "Algo salió mal. Intente de nuevo."
+    "genericError": "Algo salió mal. Intente de nuevo.",
+    "sessionExpired": "Su sesión terminó. Inicie sesión de nuevo.",
+    "portalDisabled": "El acceso al portal de su cuenta está desactivado. Llame a Atención al Cliente."
   },
   "Error": {
     "title": "Algo salió mal",
@@ -63,13 +65,18 @@
     "incorrect": "Código incorrecto. {count, plural, one {Le queda # intento} other {Le quedan # intentos}}.",
     "expired": "Este código venció. Pida uno nuevo.",
     "tooMany": "Demasiados intentos. Intente de nuevo más tarde.",
-    "genericError": "Algo salió mal. Intente de nuevo."
+    "genericError": "Algo salió mal. Intente de nuevo.",
+    "lockedTitle": "Demasiados intentos.",
+    "useDifferent": "Usar otro número"
   },
   "SelectClient": {
     "title": "¿A qué cuenta desea ingresar?",
     "subtitle": "Este número de celular está vinculado a más de una cuenta.",
     "notYou": "¿No es usted?",
-    "useDifferent": "Usar otro número"
+    "useDifferent": "Usar otro número",
+    "accountEnding": "Cuenta terminada en {digits}",
+    "current": "Actual",
+    "back": "Volver a mi portal"
   },
   "NoAccess": {
     "title": "Su cuenta no tiene acceso al portal en este momento",
@@ -181,7 +188,8 @@
       "voided": "Anulado",
       "other": "Procesado"
     },
-    "payNow": "Pagar ahora"
+    "payNow": "Pagar ahora",
+    "receipt": "Recibo"
   },
   "Receipt": {
     "title": "Recibo de pago",
@@ -214,24 +222,46 @@
     "agent": "Agente",
     "requestChange": "Solicitar un cambio",
     "whatToChange": "¿Qué desea cambiar?",
+    "chooseMany": "Elija uno o varios.",
     "fields": {
       "mobile": "Número de celular",
       "email": "Correo",
-      "address": "Dirección",
-      "other": "Otro"
+      "address": "Dirección"
     },
-    "details": "Detalles",
-    "detailsPlaceholder": "Indíquenos el dato nuevo",
     "send": "Enviar solicitud",
     "cancel": "Cancelar",
     "sentTitle": "Recibimos su solicitud.",
     "sentSub": "Su agente le contactará.",
     "done": "Listo",
-    "error": "No pudimos enviar su solicitud. Intente de nuevo."
+    "error": "No pudimos enviar su solicitud. Intente de nuevo.",
+    "newValue": {
+      "mobile": "Nuevo número de celular",
+      "email": "Nuevo correo",
+      "address": "Nueva dirección"
+    },
+    "placeholder": {
+      "mobile": "(555) 555-5555",
+      "email": "nombre@ejemplo.com"
+    },
+    "invalid": {
+      "mobile": "Ingrese un celular de 10 dígitos.",
+      "email": "Ingrese un correo válido."
+    },
+    "current": "Actual: {value}",
+    "addressForm": {
+      "street": "Dirección",
+      "streetPlaceholder": "Empiece a escribir y elija su dirección",
+      "unit": "Apto / Suite",
+      "optional": "Opcional",
+      "city": "Ciudad",
+      "state": "Estado",
+      "zip": "Código postal",
+      "incomplete": "Complete la calle, ciudad, estado (2 letras) y código postal de 5 dígitos."
+    }
   },
   "Access": {
     "title": "Mi acceso",
-    "subtitle": "Dónde se usó su cuenta recientemente.",
+    "subtitle": "Dispositivos que ingresaron a su cuenta. Toque uno para ver sus ingresos.",
     "thisDevice": "Este dispositivo",
     "today": "Hoy, {time}",
     "signOutOthers": "Cerrar sesión en otros dispositivos",
@@ -239,7 +269,27 @@
     "confirmSub": "Seguirá con la sesión iniciada aquí. Los otros dispositivos necesitarán un código nuevo para ingresar.",
     "cancel": "Cancelar",
     "signedOut": "Se cerró la sesión en otros dispositivos",
-    "error": "No pudimos cerrar la sesión en los otros dispositivos. Intente de nuevo."
+    "error": "No pudimos cerrar la sesión en los otros dispositivos. Intente de nuevo.",
+    "activeNow": "Activo ahora",
+    "active": "Con sesión",
+    "signIns": "{count, plural, one {# ingreso} other {# ingresos}}",
+    "showingLast": "Se muestran los últimos {count}.",
+    "signOutDevice": "Cerrar sesión en este dispositivo",
+    "confirmDeviceTitle": "¿Cerrar sesión en {device}?",
+    "confirmDeviceSub": "Ese dispositivo necesitará un código nuevo para volver a ingresar.",
+    "deviceSignedOut": "Sesión cerrada en el dispositivo",
+    "status": {
+      "current": "Esta sesión",
+      "active": "Con sesión",
+      "logout": "Cerró sesión",
+      "inactivity": "Cerrada por inactividad",
+      "expired": "Vencida",
+      "status_change": "Cerrada",
+      "phone_change": "Cerrada (cambio de celular)",
+      "portal_disabled": "Cerrada (acceso desactivado)",
+      "signed_out_by_client": "Cerrada por usted",
+      "ended": "Cerrada"
+    }
   },
   "Pay": {
     "title": "Hacer un pago",
@@ -258,13 +308,14 @@
     "approved": "Pago aprobado",
     "approvedMeta": "{date} · {time}",
     "downloadReceipt": "Descargar recibo",
-    "backHome": "Volver al inicio",
     "declined": "Su pago fue rechazado. Por favor pruebe con otra tarjeta o llámenos al (855) 517-0390.",
     "tryAnother": "Probar otra tarjeta",
     "nothingDue": "No tiene pagos pendientes en este momento.",
     "inProgress": "Su pago se está procesando. Espere un momento antes de intentar de nuevo.",
     "error": "No pudimos procesar su pago. Por favor intente de nuevo.",
-    "back": "Volver a pagos"
+    "done": "Listo",
+    "close": "Cerrar",
+    "cancel": "Cancelar"
   },
   "Cards": {
     "title": "Mis tarjetas",
@@ -282,12 +333,10 @@
     "cancel": "Cancelar",
     "changed": "Tarjeta de pago actualizada",
     "changeError": "No pudimos cambiar su tarjeta de pago. Por favor intente de nuevo.",
-    "addTitle": "Agregar una tarjeta",
-    "addSubtitle": "Las tarjetas se guardan de forma segura. Nunca vemos su número completo.",
+    "addTitle": "Nueva tarjeta",
     "scan": "Escanear tarjeta",
     "scanning": "Leyendo su tarjeta…",
     "scanHint": "Tome una foto de su tarjeta y completaremos los datos. Usted escribirá el CVC.",
-    "orManual": "o ingrese los datos a mano",
     "scanned": "Leímos los datos de la tarjeta. Revise que estén correctos e ingrese el CVC.",
     "scanFailed": "No pudimos leer su tarjeta. Por favor ingrese los datos a mano.",
     "cameraTitle": "Escanear tarjeta",
@@ -316,7 +365,20 @@
       "expiry": "Ingrese una fecha de vencimiento válida.",
       "cvc": "Ingrese el CVC.",
       "zipcode": "Ingrese un código postal de 5 dígitos."
-    }
+    },
+    "previewBrand": "TARJETA",
+    "previewHolder": "Titular",
+    "previewName": "Nombre completo",
+    "previewExp": "VENCE",
+    "info": "Datos de la tarjeta",
+    "numberBlock": "Número de tarjeta, bloque {n} de 4",
+    "mm": "MM",
+    "yy": "AA",
+    "example": "p. ej. {value}",
+    "expiredTitle": "Tarjeta vencida",
+    "expiredText": "Venció en {month}/{year}. Ingrese una fecha válida.",
+    "invalidMonth": "El mes debe estar entre 01 y 12",
+    "missing": "Falta: {fields}"
   },
   "Security": {
     "title": "Verificación de seguridad",
@@ -422,5 +484,10 @@
       "files": "Archivos",
       "status": "Estado"
     }
+  },
+  "NotFound": {
+    "title": "No encontramos esta página",
+    "subtitle": "Puede que el enlace esté mal o que la página se haya movido.",
+    "home": "Ir a mi portal"
   }
 }

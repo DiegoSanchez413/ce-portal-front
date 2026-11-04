@@ -33,26 +33,70 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-/* Paleta de los mockups del portal */
-@theme {
+/* Paleta global: los mismos valores que src/lib/theme/colors.ts (un test verifica que coincidan). */
+/* static publica todas las variables aunque no haya una clase que las use (degradados, estilos en línea). */
+@theme static {
   --color-brand: #f26a21;
-  --color-brand-soft: #fef0e7;
+  --color-brand-hover: #db5a15;
   --color-brand-strong: #c2410c;
+  --color-brand-soft: #fef0e7;
   --color-brand-focus: #fed7aa;
+  --color-brand-tint: #fffbf8;
+  --color-brand-wash: #fff7ed;
   --color-navy: #1f2a44;
+  --color-navy-light: #2f3f66;
+  --color-body: #4b5563;
   --color-ink-muted: #6b7280;
+  --color-faint: #9ca3af;
   --color-line: #e5e7eb;
   --color-line-strong: #d1d5db;
   --color-line-soft: #eef0f3;
+  --color-line-cool: #dce3ec;
   --color-surface: #f5f6f8;
   --color-surface-alt: #f7f8fa;
-  --color-whatsapp: #22c55e;
+  --color-white: #ffffff;
+  --color-wave-1: #efe5dd;
+  --color-wave-2: #f2d8cd;
+  --color-success: #15803d;
+  --color-success-strong: #166534;
+  --color-success-soft: #dcfce7;
+  --color-success-tint: #f0fdf4;
+  --color-success-line: #bbf7d0;
+  --color-success-accent: #22c55e;
   --color-danger: #dc2626;
-
+  --color-danger-strong: #b91c1c;
+  --color-danger-text: #991b1b;
+  --color-danger-soft: #fee2e2;
+  --color-danger-tint: #fef2f2;
+  --color-danger-line: #fecaca;
+  --color-danger-light: #fca5a5;
+  --color-warning: #b45309;
+  --color-warning-strong: #92400e;
+  --color-warning-accent: #d97706;
+  --color-warning-soft: #fef3c7;
+  --color-warning-tint: #fffbeb;
+  --color-warning-line: #fde68a;
+  --color-info: #1d4ed8;
+  --color-info-strong: #1e3a8a;
+  --color-info-soft: #dbeafe;
+  --color-info-tint: #eff6ff;
+  --color-info-line: #bfdbfe;
+  --color-whatsapp: #22c55e;
   --color-bureau-equifax: #b91c1c;
   --color-bureau-experian: #1d4ed8;
   --color-bureau-transunion: #0891b2;
+  --color-bureau-transunion-tint: #ecfeff;
+  --color-card-visa: #1a1f71;
+  --color-card-mc: #eb001b;
+  --color-card-amex: #2e77bc;
+  --color-card-discover: #e55c20;
+  --color-card-chip: #b8912f;
+  --color-card-chip-light: #e8c877;
+  --color-card-chip-shine: #f0daa0;
+  --color-card-chip-ink: #5a4614;
+  --color-card-stripe: #101828;
 
+  /* Rangos del score: Poor, Fair y Good. */
   --color-range-poor: #b91c1c;
   --color-range-poor-bg: #fee2e2;
   --color-range-fair: #b45309;
@@ -60,11 +104,17 @@
   --color-range-good: #15803d;
   --color-range-good-bg: #dcfce7;
 
-  --color-info: #1d4ed8;
-  --color-info-bg: #dbeafe;
-
-  --color-card-visa: #1a1f71;
-  --color-card-mc: #eb001b;
+  /* Sombras: tarjeta, elemento elevado, menú, modal y botón de marca. */
+  --shadow-card: 0 4px 20px rgba(31, 42, 68, 0.06);
+  --shadow-card-up: 0 -4px 20px rgba(31, 42, 68, 0.06);
+  --shadow-raised: 0 4px 20px rgba(31, 42, 68, 0.08);
+  --shadow-header: 0 2px 12px rgba(31, 42, 68, 0.08);
+  --shadow-pill: 0 1px 4px rgba(31, 42, 68, 0.15);
+  --shadow-popover: 0 14px 40px rgba(31, 42, 68, 0.18);
+  --shadow-toast: 0 10px 30px rgba(31, 42, 68, 0.3);
+  --shadow-modal: 0 24px 60px rgba(31, 42, 68, 0.3);
+  --shadow-sheet: 0 -10px 40px rgba(31, 42, 68, 0.2);
+  --shadow-brand: 0 6px 16px rgba(242, 106, 33, 0.3);
 }
 
 :root {
@@ -96,4 +146,16 @@
   body {
     @apply bg-background text-foreground font-sans;
   }
+}
+
+/* Campo completado desde la foto de la tarjeta y entrada del modal de tarjeta. */
+@keyframes field-filled {
+  0% { border-color: #22c55e; box-shadow: 0 0 0 4px #dcfce7; background: #dcfce7; }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+@keyframes modal-rise {
+  from { opacity: 0; transform: translateY(12px) scale(0.98); }
+}
+@keyframes modal-fade {
+  from { opacity: 0; }
 }

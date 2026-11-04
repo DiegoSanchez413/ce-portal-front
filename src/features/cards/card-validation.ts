@@ -90,9 +90,7 @@ export function validateDraft(draft: CardDraft, today = new Date()): Partial<Rec
   if (draft.cardholdername.trim().length < 2) errors.cardholdername = true;
   if (!luhn(draft.cardnumber)) errors.cardnumber = true;
   if (!expiryInFuture(draft.expiry, today)) errors.expiry = true;
-  const brand = detectBrand(draft.cardnumber);
-  const cvcPattern = brand === "AMEX" ? /^\d{4}$/ : brand ? /^\d{3}$/ : /^\d{3,4}$/;
-  if (!cvcPattern.test(draft.cvc)) errors.cvc = true;
+  if (!/^\d{3,4}$/.test(draft.cvc)) errors.cvc = true;
   if (!/^\d{5}$/.test(draft.zipcode)) errors.zipcode = true;
   return errors;
 }

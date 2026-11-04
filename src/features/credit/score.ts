@@ -1,12 +1,15 @@
+import type { BadgeTone } from "@/components/ui/badge";
+import { colors } from "@/lib/theme/colors";
+
 export type ScoreRange = "poor" | "fair" | "good";
 export type Bureau = "equifax" | "experian" | "transunion";
 
 export const BUREAUS: Bureau[] = ["equifax", "experian", "transunion"];
 
 export const BUREAU_COLORS: Record<Bureau, string> = {
-  equifax: "#B91C1C",
-  experian: "#1D4ED8",
-  transunion: "#0891B2",
+  equifax: colors["bureau-equifax"],
+  experian: colors["bureau-experian"],
+  transunion: colors["bureau-transunion"],
 };
 
 export const SCORE_MIN = 300;
@@ -19,15 +22,14 @@ export function scoreRange(score: number): ScoreRange {
   return "poor";
 }
 
-export const RANGE_STYLES: Record<ScoreRange, { fg: string; bg: string }> = {
-  poor: { fg: "#B91C1C", bg: "#FEE2E2" },
-  fair: { fg: "#B45309", bg: "#FEF3C7" },
-  good: { fg: "#15803D", bg: "#DCFCE7" },
-};
+export const RANGE_TONES: Record<ScoreRange, BadgeTone> = { poor: "danger", fair: "warning", good: "success" };
 
-// Variación con signo y color: verde si sube, rojo si baja, gris si no cambia.
-export function formatDelta(delta: number): { text: string; fg: string; bg: string } {
-  if (delta > 0) return { text: `+${delta}`, fg: "#15803D", bg: "#DCFCE7" };
-  if (delta < 0) return { text: `${delta}`, fg: "#B91C1C", bg: "#FEE2E2" };
-  return { text: "0", fg: "#4B5563", bg: "#EEF0F3" };
+// Color del número del score según su rango; sin score, gris claro.
+export const RANGE_TEXT: Record<ScoreRange | "none", string> = { poor: "text-danger-strong", fair: "text-warning", good: "text-success", none: "text-faint" };
+
+// Variación con signo y tono: verde si sube, rojo si baja, gris si no cambia.
+export function formatDelta(delta: number): { text: string; tone: BadgeTone } {
+  if (delta > 0) return { text: `+${delta}`, tone: "success" };
+  if (delta < 0) return { text: `${delta}`, tone: "danger" };
+  return { text: "0", tone: "neutral" };
 }
