@@ -6,9 +6,9 @@ import { Dialog } from "radix-ui";
 import type { ComponentProps, ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
-// Las sugerencias de Google se dibujan fuera del modal: tocarlas no debe cerrarlo.
-export function keepForPlaces(e: { target: EventTarget | null; preventDefault: () => void }) {
-  if (e.target instanceof Element && e.target.closest(".pac-container")) e.preventDefault();
+// Un clic fuera del modal no lo cierra: solo la X, Cancel o Escape.
+function keepOpen(e: { preventDefault: () => void }) {
+  e.preventDefault();
 }
 
 // Modal de formulario: centrado en escritorio y hoja desde abajo en celular; el contenido se monta solo mientras está abierto.
@@ -21,7 +21,7 @@ export function Modal({ open, title, locked = false, onClose, children }: { open
         <Dialog.Overlay className="fixed inset-0 z-50 flex items-end justify-center overflow-y-auto bg-navy/55 animate-[modal-fade_.2s_ease_backwards] motion-reduce:animate-none md:items-center md:p-5">
           <Dialog.Content
             aria-describedby={undefined}
-            onInteractOutside={keepForPlaces}
+            onInteractOutside={keepOpen}
             className="flex max-h-[92dvh] w-full flex-col overflow-y-auto rounded-t-2xl bg-white shadow-modal outline-none animate-[modal-rise_.26s_cubic-bezier(.22,.61,.36,1)_backwards] motion-reduce:animate-none md:max-h-[calc(100dvh-40px)] md:w-[560px] md:rounded-2xl"
           >
             <div className="flex items-center justify-between gap-3 pt-5 pr-5 pl-6">
@@ -65,7 +65,7 @@ export function Sheet({
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-navy/55 data-[state=open]:animate-in data-[state=open]:fade-in-0" />
         <Dialog.Content
-          onInteractOutside={keepForPlaces}
+          onInteractOutside={keepOpen}
           className="fixed inset-x-0 bottom-0 z-50 flex max-h-[92dvh] flex-col gap-4 overflow-y-auto rounded-t-[20px] bg-card px-5 pt-4 pb-7 shadow-sheet outline-none data-[state=open]:animate-in data-[state=open]:slide-in-from-bottom lg:inset-auto lg:top-1/2 lg:left-1/2 lg:w-[480px] lg:-translate-x-1/2 lg:-translate-y-1/2 lg:rounded-[20px] lg:p-7 lg:data-[state=open]:slide-in-from-bottom-0 lg:data-[state=open]:zoom-in-95"
         >
           <div className="mx-auto h-1 w-10 rounded-full bg-line lg:hidden" />

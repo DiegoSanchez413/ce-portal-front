@@ -155,6 +155,9 @@ function PaymentsCard({ payments, cardAlert }: { payments: Home["payments"]; car
         </div>
       )}
       {cardAlert && <CardAlert alert={cardAlert} />}
+      {payments.amount_due !== null && payments.amount_due !== undefined && payments.amount_due > 0 && (
+        <PayNowButton size="md" block>{t("payNow")}</PayNowButton>
+      )}
       <Button asChild variant="link" size="inline" className="min-h-11 self-start text-sm hover:no-underline">
         <Link href="/payments">{t("seePayments")} ›</Link>
       </Button>
@@ -188,6 +191,7 @@ function CardAlert({ alert }: { alert: NonNullable<Home["card_alert"]> }) {
 function LoyalCard({ amountDue, cardAlert }: { amountDue: number | null; cardAlert: Home["card_alert"] }) {
   const t = useTranslations("Home");
   const [state, setState] = useState<"idle" | "busy" | "sent" | "error">("idle");
+  const owes = amountDue !== null && amountDue > 0;
 
   const request = async () => {
     setState("busy");
@@ -202,19 +206,18 @@ function LoyalCard({ amountDue, cardAlert }: { amountDue: number | null; cardAle
   return (
     <Card className="gap-3">
       <CardLabel>{t("payments")}</CardLabel>
+      {/* Con deuda pendiente se muestra el saldo en lugar del agradecimiento. */}
       <div className="flex items-start gap-3">
-        <IconTile tone="success" shape="circle">
-          <Check className="size-5" strokeWidth={2.5} aria-hidden />
+        <IconTile tone={owes ? "brand" : "success"} shape="circle">
+          {owes ? <TriangleAlert className="size-5" strokeWidth={2.5} aria-hidden /> : <Check className="size-5" strokeWidth={2.5} aria-hidden />}
         </IconTile>
         <div className="flex flex-col gap-0.5">
-          <span className="text-[17px] leading-snug font-extrabold">{t("loyalTitle")}</span>
-          <span className="text-[13px] font-semibold text-body">{t("loyalSub")}</span>
+          <span className="text-[17px] leading-snug font-extrabold">{owes ? t("loyalDueTitle", { amount: formatMoney(amountDue ?? 0) }) : t("loyalTitle")}</span>
+          <span className="text-[13px] font-semibold text-body">{owes ? t("loyalDueSub") : t("loyalSub")}</span>
         </div>
       </div>
       {cardAlert && <CardAlert alert={cardAlert} />}
-      {amountDue !== null && amountDue > 0 && (
-        <PayNowButton size="md" block>{t("payNow")}</PayNowButton>
-      )}
+      {owes && <PayNowButton size="md" block>{t("payNow")}</PayNowButton>}
       {state === "sent" && <Alert tone="success">{t("loyalConfirm")}</Alert>}
       {state === "error" && <InlineMessage>{t("requestError")}</InlineMessage>}
       <Button variant="outline" size="md" block onClick={() => void request()} disabled={state === "busy" || state === "sent"}>

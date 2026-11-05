@@ -17,8 +17,8 @@ export function Toast({ message, onDone }: { message: string | null; onDone: () 
 
   if (!message) return null;
   return (
-    <div role="status" className="fixed inset-x-4 bottom-[104px] z-[60] mx-auto flex max-w-md items-center gap-2.5 rounded-[14px] bg-navy px-4 py-3.5 text-sm font-bold text-white shadow-toast lg:bottom-8">
-      <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-success-accent">
+    <div role="status" className="fixed inset-x-4 bottom-[104px] z-[60] mx-auto flex max-w-md items-center gap-2.5 rounded-[14px] bg-navy px-4 py-3.5 text-sm font-bold text-white shadow-toast lg:bottom-8 animate-[toast-in_.35s_cubic-bezier(.22,.61,.36,1)] motion-reduce:animate-none">
+      <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-success-accent animate-[success-pop_.45s_cubic-bezier(.34,1.56,.64,1)_.15s_backwards] motion-reduce:animate-none">
         <CircleCheck className="size-4" strokeWidth={2.75} aria-hidden />
       </span>
       {message}

@@ -13,6 +13,7 @@ import { api } from "@/lib/api/client";
 import type { PortalSessionInfo } from "@/lib/api/types";
 import { SessionContext, type SessionActions } from "./session-context";
 import { LANGUAGE_SYNCED, leavePortal } from "./leave-portal";
+import { PayProvider } from "@/features/pay/pay-view";
 import { fetchSession, SESSION_KEY, type SessionState } from "./session-query";
 
 // Protege las páginas con sesión: sin sesión va al login, sin acceso muestra la pantalla de reactivación.
@@ -102,7 +103,7 @@ export function PortalShell({ children }: { children: ReactNode }) {
         }
         withNav
       >
-        {children}
+        <PayProvider>{children}</PayProvider>
       </Frame>
     </SessionContext.Provider>
   );

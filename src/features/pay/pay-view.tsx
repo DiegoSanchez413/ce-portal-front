@@ -1,9 +1,9 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { CircleCheck, Download, LoaderCircle, Lock, Plus } from "lucide-react";
+import { Download, LoaderCircle, Lock, Plus } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { useEffect, useRef, useState } from "react";
+import { createContext, type ReactNode, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { BrandBadge } from "@/features/cards/brand-badge";
 import { MissingNote } from "@/features/cards/add-card-dialog";
 import { CardForm } from "@/features/cards/card-form";
@@ -14,8 +14,8 @@ import { Alert, InlineMessage } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button, type ButtonProps } from "@/components/ui/button";
 import { CardLabel } from "@/components/ui/card";
-import { IconTile, RadioCard } from "@/components/ui/choice";
-import { QueryState } from "@/components/ui/feedback";
+import { RadioCard } from "@/components/ui/choice";
+import { QueryState, Toast } from "@/components/ui/feedback";
 import { Modal, ModalActions } from "@/components/ui/modal";
 import { usePortalQuery } from "@/features/portal/use-portal-query";
 import { useStepUp } from "@/features/security/security-check";
@@ -26,33 +26,58 @@ import { expiredDefault, initialCardId, payBreakdown, screenFor, usableCards } f
 
 const NEW_CARD = "new";
 
+const OpenPay = createContext<() => void>(() => {});
+
+// Modal de pago único del portal: sigue abierto aunque el Pay now que lo abrió desaparezca al quedar la cuenta al día.
+export function PayProvider({ children }: { children: ReactNode }) {
+  const t = useTranslations("Pay");
+  const queryClient = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+  const openPay = useCallback(() => setOpen(true), []);
+  // La pantalla de fondo se actualiza al cerrar el modal, no mientras el cliente ve el resultado.
+  const close = () => {
+    setOpen(false);
+    CARD_QUERIES.forEach((key) => void queryClient.invalidateQueries({ queryKey: [key] }));
+  };
+  const clearToast = useCallback(() => setToast(null), []);
+  return (
+    <OpenPay.Provider value={openPay}>
+      {children}
+      <PayDialog open={open} onClose={close} onApproved={() => setToast(t("approvedToast"))} />
+      <Toast message={toast} onDone={clearToast} />
+    </OpenPay.Provider>
+  );
+}
+
 // Botón Pay now: abre el modal de pago en la misma pantalla; acepta los props de Button para el tamaño.
 export function PayNowButton({ children, ...props }: Omit<ButtonProps, "onClick">) {
-  const [open, setOpen] = useState(false);
+  const openPay = useContext(OpenPay);
   return (
-    <>
-      <Button {...props} onClick={() => setOpen(true)}>
-        {children}
-      </Button>
-      <PayDialog open={open} onClose={() => setOpen(false)} />
-    </>
+    <Button {...props} onClick={openPay}>
+      {children}
+    </Button>
   );
 }
 
 // Pay now en un solo modal: monto fijo, tarjeta guardada o nueva, rechazo y confirmación con el recibo.
-export function PayDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function PayDialog({ open, onClose, onApproved }: { open: boolean; onClose: () => void; onApproved?: () => void }) {
   const t = useTranslations("Pay");
   const [busy, setBusy] = useState(false);
   return (
     <Modal open={open} title={t("title")} locked={busy} onClose={onClose}>
-      <PayBody setBusy={setBusy} onClose={onClose} />
+      <PayBody setBusy={setBusy} onClose={onClose} onApproved={onApproved} />
     </Modal>
   );
 }
 
-function PayBody({ setBusy, onClose }: { setBusy: (busy: boolean) => void; onClose: () => void }) {
+function PayBody({ setBusy, onClose, onApproved }: { setBusy: (busy: boolean) => void; onClose: () => void; onApproved?: () => void }) {
   const query = usePortalQuery("pay", () => api.GET("/pay"));
   const [result, setResult] = useState<PaymentResult | null>(null);
+  const showResult = (next: PaymentResult) => {
+    setResult(next);
+    if (screenFor(next) === "approved") onApproved?.();
+  };
 
   return (
     <>
@@ -61,7 +86,7 @@ function PayBody({ setBusy, onClose }: { setBusy: (busy: boolean) => void; onClo
         (screenFor(result) === "approved" && result ? (
           <Approved result={result} onClose={onClose} />
         ) : (
-          <Review pay={query.data} declined={result !== null} setBusy={setBusy} onClose={onClose} onResult={setResult} onRetry={() => setResult(null)} />
+          <Review pay={query.data} declined={result !== null} setBusy={setBusy} onClose={onClose} onResult={showResult} onRetry={() => setResult(null)} />
         ))}
     </>
   );
@@ -83,7 +108,6 @@ function Review({
   onRetry: () => void;
 }) {
   const t = useTranslations("Pay");
-  const queryClient = useQueryClient();
   const usable = usableCards(pay.cards);
   const [selected, setSelected] = useState<number | typeof NEW_CARD | null>(() => initialCardId(pay) ?? (usable.length === 0 ? NEW_CARD : null));
   const [draft, setDraft] = useState<CardDraft>(() => emptyDraft(usable.length === 0));
@@ -132,7 +156,6 @@ function Review({
       if (response.status === 403 && code === "step_up_required") return "step_up";
       if (data) {
         idempotencyKey.current = crypto.randomUUID();
-        await Promise.all(CARD_QUERIES.map((key) => queryClient.invalidateQueries({ queryKey: [key] })));
         return onResult(data);
       }
       idempotencyKey.current = crypto.randomUUID();
@@ -181,6 +204,7 @@ function Review({
 
       {declined && (
         <Alert
+          className="animate-[shake_.4s_ease-in-out] motion-reduce:animate-none"
           tone="danger"
           action={
             <Button
@@ -220,6 +244,9 @@ function Review({
   );
 }
 
+// Entrada escalonada de la confirmación: cada línea sube y aparece con su propio retraso.
+const RISE = "block animate-[rise-in_.4s_cubic-bezier(.22,.61,.36,1)_backwards] motion-reduce:animate-none";
+
 // Fecha local YYYY-MM-DD del momento del cobro.
 const localDay = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 
@@ -244,27 +271,43 @@ function Approved({ result, onClose }: { result: PaymentResult; onClose: () => v
 
   return (
     <div className="flex flex-col items-center gap-4 py-4 text-center">
-      <IconTile tone="success" shape="circle" className="size-16">
-        <CircleCheck className="size-9" strokeWidth={2.25} aria-hidden />
-      </IconTile>
+      {/* Check que se dibuja con un halo que se expande; el resto entra escalonado. */}
+      <div className="relative flex size-20 items-center justify-center">
+        <span className="absolute inset-0 rounded-full bg-success-accent/30 animate-[success-ring_1s_ease-out_.15s_both] motion-reduce:hidden" aria-hidden />
+        <span className="relative flex size-20 items-center justify-center rounded-full bg-success-soft animate-[success-pop_.5s_cubic-bezier(.34,1.56,.64,1)_backwards] motion-reduce:animate-none">
+          <svg viewBox="0 0 24 24" className="size-10 text-success" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <path d="M6 12.5l4 4 8-9" pathLength={1} strokeDasharray={1} className="[stroke-dashoffset:0] animate-[check-draw_.45s_ease-out_.3s_backwards] motion-reduce:animate-none" />
+          </svg>
+        </span>
+      </div>
       <div className="flex flex-col gap-1">
-        <span className="text-lg font-extrabold">{t("approved")}</span>
-        <span className="text-[34px] leading-tight font-extrabold">{formatMoney(result.amount)}</span>
-        <span className="text-sm font-semibold text-ink-muted">
+        <span className={`${RISE} text-lg font-extrabold`} style={{ animationDelay: "350ms" }}>
+          {t("approved")}
+        </span>
+        <span className={`${RISE} text-[34px] leading-tight font-extrabold`} style={{ animationDelay: "420ms" }}>
+          {formatMoney(result.amount)}
+        </span>
+        <span className={`${RISE} text-sm font-semibold text-ink-muted`} style={{ animationDelay: "490ms" }}>
           {t("approvedMeta", { date: formatDate(localDay(paidAt), locale), time: formatTimeOfDay(paidAt, locale) })}
         </span>
-        {result.card && <span className="text-sm font-semibold text-ink-muted">{cardLabel(result.card)}</span>}
+        {result.card && (
+          <span className={`${RISE} text-sm font-semibold text-ink-muted`} style={{ animationDelay: "540ms" }}>
+            {cardLabel(result.card)}
+          </span>
+        )}
       </div>
-      {result.transaction_id && (
-        <Button variant="outline" size="md" block onClick={() => void openReceipt()}>
-          <Download className="size-[18px]" strokeWidth={2.25} aria-hidden />
-          {t("downloadReceipt")}
+      <div className={`${RISE} flex w-full flex-col gap-3`} style={{ animationDelay: "620ms" }}>
+        {result.transaction_id && (
+          <Button variant="outline" size="md" block onClick={() => void openReceipt()}>
+            <Download className="size-[18px]" strokeWidth={2.25} aria-hidden />
+            {t("downloadReceipt")}
+          </Button>
+        )}
+        {failed && <InlineMessage>{t("error")}</InlineMessage>}
+        <Button size="md" block onClick={onClose}>
+          {t("done")}
         </Button>
-      )}
-      {failed && <InlineMessage>{t("error")}</InlineMessage>}
-      <Button size="md" block onClick={onClose}>
-        {t("done")}
-      </Button>
+      </div>
       <ReceiptDialog receipt={receipt} onClose={() => setReceipt(null)} />
     </div>
   );
